@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Müdavim 101 Okey</title>
+<meta name="description" content="Müdavim 101 Okey: kahvehane keyfi cebinde. Gerçek rakiplerle ücretsiz 101 Okey oyna — Android, iOS ve Web.">
+<meta name="theme-color" content="#140a06">
+<meta property="og:title" content="Müdavim 101 Okey">
+<meta property="og:description" content="Kahvehane keyfi cebinde. Gerçek rakiplerle ücretsiz 101 Okey.">
+<meta property="og:image" content="assets/img/cinaralti-land.jpg">
+<link rel="icon" href="assets/img/logo-tr.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#140a06; --ink2:#22130b; --wood:#3a2214; --wood2:#5b3820;
+  --gold:#f5b642; --gold2:#ffd98a; --amber:#e8892b;
+  --red:#e0343f; --blue:#1d6fe0; --orange:#f08a12; --black:#1c1c1c;
+  --felt:#0f5b3e; --cream:#f7ecd4; --text:#f7ecd4; --muted:#cdb898;
+  --radius:22px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--text);font-family:Outfit,system-ui,sans-serif;overflow-x:hidden;line-height:1.55;-webkit-font-smoothing:antialiased}
+img,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--gold);color:var(--ink)}
+
+/* ---------- grain + cursor glow ---------- */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:999;opacity:.06;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+#glow{position:fixed;width:520px;height:520px;border-radius:50%;pointer-events:none;z-index:1;left:0;top:0;
+  background:radial-gradient(circle,rgba(245,182,66,.16),transparent 62%);transform:translate(-50%,-50%);transition:opacity .4s;mix-blend-mode:screen}
+#progress{position:fixed;top:0;left:0;height:3px;z-index:200;background:linear-gradient(90deg,var(--red),var(--gold),var(--blue));width:0;box-shadow:0 0 12px var(--gold)}
+
+/* ---------- nav ---------- */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;gap:20px;padding:14px clamp(16px,4vw,48px);transition:background .35s,backdrop-filter .35s,padding .35s}
+nav.scrolled{background:rgba(20,10,6,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);padding-top:10px;padding-bottom:10px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+.brand{display:flex;align-items:center;gap:10px;white-space:nowrap;font-family:"Playfair Display",serif;font-weight:900;font-size:20px;letter-spacing:.3px}
+.brand img{width:40px;height:40px;border-radius:11px;box-shadow:0 0 0 2px rgba(245,182,66,.5),0 6px 18px rgba(0,0,0,.5)}
+.navlinks{display:flex;gap:26px;margin-left:auto;font-weight:600;font-size:15px}
+.navlinks a{opacity:.82;position:relative;transition:opacity .2s}
+.navlinks a:hover{opacity:1}
+.navlinks a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:2px;background:var(--gold);transform:scaleX(0);transition:transform .3s;transform-origin:left}
+.navlinks a:hover::after{transform:scaleX(1)}
+.nav-cta{padding:10px 18px;border-radius:999px;font-weight:800;font-size:14px;background:linear-gradient(135deg,var(--gold2),var(--gold) 45%,var(--amber));color:var(--ink);box-shadow:0 6px 20px rgba(245,182,66,.35);white-space:nowrap}
+
+/* language dropdown */
+.lang{position:relative}
+.lang-btn{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.08);border:1px solid rgba(245,182,66,.35);color:var(--text);padding:9px 14px;border-radius:999px;font:600 14px Outfit,sans-serif;cursor:pointer;transition:background .2s}
+.lang-btn:hover{background:rgba(255,255,255,.14)}
+.lang-btn .chev{transition:transform .25s}
+.lang.open .chev{transform:rotate(180deg)}
+.lang-menu{position:absolute;right:0;top:calc(100% + 8px);min-width:170px;background:rgba(34,19,11,.97);border:1px solid rgba(245,182,66,.35);border-radius:16px;padding:6px;box-shadow:0 18px 40px rgba(0,0,0,.5);opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:all .2s;backdrop-filter:blur(12px)}
+.lang.open .lang-menu{opacity:1;transform:none;pointer-events:auto}
+.lang-menu button{display:flex;width:100%;align-items:center;gap:10px;padding:10px 12px;border:0;background:none;color:var(--text);font:500 15px Outfit,sans-serif;border-radius:10px;cursor:pointer;text-align:left}
+.lang-menu button:hover{background:rgba(245,182,66,.14)}
+.lang-menu button.active{background:rgba(245,182,66,.22);color:var(--gold2)}
+.flag{display:block;border-radius:3px;box-shadow:0 0 0 1px rgba(255,255,255,.25);flex:none}#langFlag{display:flex}
+
+/* ---------- hero ---------- */
+.hero{position:relative;min-height:100svh;display:grid;align-items:center;overflow:hidden;isolation:isolate}
+.hero-bg{position:absolute;inset:-6%;background:url(assets/img/cinaralti-land.jpg) center/cover no-repeat;z-index:-3;animation:kenburns 26s ease-in-out infinite alternate;will-change:transform}
+@keyframes kenburns{from{transform:scale(1.05) translate(0,0)}to{transform:scale(1.16) translate(-2%,-1.5%)}}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:
+  radial-gradient(ellipse at 70% 40%,transparent 0,rgba(20,10,6,.35) 45%,rgba(20,10,6,.92) 100%),
+  linear-gradient(90deg,rgba(20,10,6,.94) 0%,rgba(20,10,6,.55) 45%,rgba(20,10,6,.25) 100%),
+  linear-gradient(0deg,var(--ink) 0%,transparent 30%)}
+#embers{position:absolute;inset:0;z-index:-1;pointer-events:none}
+.hero-inner{width:min(1240px,100%);margin:0 auto;padding:120px clamp(16px,4vw,48px) 90px;display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.eyebrow{display:inline-flex;align-items:center;gap:10px;padding:8px 16px;border-radius:999px;background:rgba(245,182,66,.12);border:1px solid rgba(245,182,66,.4);color:var(--gold2);font-weight:600;font-size:14px;letter-spacing:.4px;backdrop-filter:blur(6px)}
+.eyebrow .dot{width:8px;height:8px;border-radius:50%;background:#3ddc84;box-shadow:0 0 0 0 rgba(61,220,132,.7);animation:pulse 1.8s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 12px rgba(61,220,132,0)}100%{box-shadow:0 0 0 0 rgba(61,220,132,0)}}
+h1.title{font-family:"Playfair Display",serif;font-weight:900;font-size:clamp(54px,9vw,128px);line-height:.92;margin:22px 0 10px;letter-spacing:-1px}
+.shine{background:linear-gradient(100deg,#b8741c 0%,#ffe6a8 18%,#f5b642 32%,#fff6dc 46%,#d99128 60%,#ffd98a 78%,#b8741c 100%);background-size:250% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 6s linear infinite;filter:drop-shadow(0 6px 24px rgba(245,182,66,.35))}
+@keyframes shine{to{background-position:250% center}}
+h1.title .num{display:block;font-style:italic;font-size:1.05em}
+.rotator{font-size:clamp(22px,2.6vw,32px);font-weight:600;min-height:1.5em;color:var(--cream)}
+.rotator .cursor{display:inline-block;width:3px;height:1em;background:var(--gold);margin-left:4px;vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.hero p.lead{max-width:560px;color:var(--muted);font-size:clamp(16px,1.4vw,19px);margin:14px 0 30px}
+
+/* store buttons */
+.stores{display:flex;flex-wrap:wrap;gap:14px}
+.store{--c1:#000;--c2:#1b1b1b;position:relative;display:flex;align-items:center;gap:12px;padding:12px 22px 12px 16px;border-radius:16px;background:linear-gradient(160deg,var(--c2),var(--c1));border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 30px rgba(0,0,0,.45);overflow:hidden;transition:transform .25s,box-shadow .25s,border-color .25s;min-width:190px}
+.store::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);animation:sweep 4.5s ease-in-out infinite}
+.store:nth-child(2)::after{animation-delay:1.2s}.store:nth-child(3)::after{animation-delay:2.4s}
+@keyframes sweep{0%,60%{left:-80%}100%{left:140%}}
+.store:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(245,182,66,.28);border-color:rgba(245,182,66,.7)}
+.store svg{width:30px;height:30px;flex:none}
+.store small{display:block;font-size:11px;opacity:.75;letter-spacing:.5px;text-transform:uppercase}
+.store b{display:block;font-size:19px;font-weight:600;line-height:1.1}
+.store.web{--c1:#8a4b12;--c2:#d98b23;border-color:rgba(255,220,150,.5)}
+.trust{display:flex;gap:22px;flex-wrap:wrap;margin-top:28px;color:var(--muted);font-size:14px}
+.trust span{display:flex;align-items:center;gap:8px}
+.trust i{font-style:normal;color:var(--gold)}
+
+/* phone mockup */
+.phone{position:relative;width:min(300px,72vw);aspect-ratio:9/19.5;margin:0 auto;border-radius:44px;padding:12px;background:linear-gradient(145deg,#3b3b3b,#0b0b0b 40%,#262626);box-shadow:0 0 0 2px #575757,0 40px 80px rgba(0,0,0,.65),0 0 120px rgba(245,182,66,.25);transform:perspective(1200px) rotateY(-14deg) rotateX(6deg);transition:transform .2s ease-out}
+.phone::before{content:"";position:absolute;top:22px;left:50%;transform:translateX(-50%);width:90px;height:24px;border-radius:20px;background:#000;z-index:3}
+.phone .screen{width:100%;height:100%;border-radius:34px;overflow:hidden;background:#000;position:relative}
+.phone video,.phone img{width:100%;height:100%;object-fit:cover}
+.phone-wrap{position:relative}
+.phone-wrap .halo{position:absolute;inset:-12%;border-radius:50%;background:conic-gradient(from 0deg,var(--red),var(--gold),var(--blue),var(--orange),var(--red));filter:blur(70px);opacity:.38;animation:spin 14s linear infinite;z-index:-1}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* floating tiles */
+.tile{--c:var(--red);position:relative;width:var(--tw,58px);height:calc(var(--tw,58px)*1.38);border-radius:calc(var(--tw,58px)*.14);background:linear-gradient(165deg,#fffaf0 0%,#f3e6c9 70%,#e2cfa6 100%);box-shadow:inset 0 -5px 0 #d4bd8d,inset 0 2px 0 #fff,0 8px 18px rgba(0,0,0,.45);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:calc(var(--tw,58px)*.16);color:var(--c);font-weight:800;font-size:calc(var(--tw,58px)*.52);line-height:1;user-select:none}
+.tile::after{content:"";width:22%;aspect-ratio:1;border-radius:50%;background:var(--c);margin-top:12%;opacity:.9;box-shadow:inset 0 1px 1px rgba(255,255,255,.4)}
+.tile.blue{--c:var(--blue)}.tile.orange{--c:var(--orange)}.tile.black{--c:var(--black)}.tile.red{--c:var(--red)}
+.tile.star::after{content:"★";background:none;width:auto;aspect-ratio:auto;font-size:.5em;margin-top:6%;color:var(--c)}
+.floaters{position:absolute;inset:0;pointer-events:none;z-index:-1}
+.floaters .tile{position:absolute;animation:float var(--d,9s) ease-in-out infinite;animation-delay:var(--del,0s);opacity:.92}
+@keyframes float{0%,100%{transform:translateY(0) rotate(var(--r,-12deg))}50%{transform:translateY(-26px) rotate(calc(var(--r,-12deg) * -1))}}
+.scroll-hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.scroll-hint .m{width:24px;height:38px;border:2px solid var(--muted);border-radius:14px;position:relative}
+.scroll-hint .m::after{content:"";position:absolute;left:50%;top:7px;width:4px;height:8px;border-radius:2px;background:var(--gold);transform:translateX(-50%);animation:wheel 1.6s infinite}
+@keyframes wheel{to{transform:translate(-50%,12px);opacity:0}}
+
+/* ---------- marquee ---------- */
+.marquee{position:relative;background:linear-gradient(90deg,var(--red),#b71f2a);transform:rotate(-2deg);margin:-30px -2% 0;padding:16px 0;box-shadow:0 20px 50px rgba(0,0,0,.5);z-index:5;overflow:hidden}
+.marquee.alt{background:linear-gradient(90deg,var(--felt),#0a4430);transform:rotate(1.5deg);margin-top:-8px}
+.track{display:flex;gap:44px;width:max-content;animation:marq 32s linear infinite;font-family:"Playfair Display",serif;font-weight:900;font-size:clamp(20px,2.4vw,30px);white-space:nowrap;align-items:center}
+.marquee.alt .track{animation-direction:reverse;animation-duration:38s}
+.track span{display:flex;align-items:center;gap:44px}
+.track span::after{content:"✦";color:var(--gold2);font-size:.8em}
+@keyframes marq{to{transform:translateX(-50%)}}
+
+/* ---------- sections ---------- */
+section{position:relative;padding:clamp(80px,11vw,140px) clamp(16px,4vw,48px)}
+.wrap{width:min(1200px,100%);margin:0 auto}
+.kicker{color:var(--gold);font-weight:800;letter-spacing:3px;text-transform:uppercase;font-size:13px;display:flex;align-items:center;gap:12px}
+.kicker::before{content:"";width:34px;height:2px;background:var(--gold)}
+h2{font-family:"Playfair Display",serif;font-weight:900;font-size:clamp(36px,5.4vw,68px);line-height:1.02;margin:14px 0 18px;letter-spacing:-.5px}
+h2 em{font-style:italic;color:var(--gold)}
+.sub{color:var(--muted);max-width:640px;font-size:18px}
+.center{text-align:center}.center .kicker{justify-content:center}.center .sub{margin:0 auto}
+
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.1s}.reveal.d2{transition-delay:.2s}.reveal.d3{transition-delay:.3s}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:56px}
+.stat{padding:30px 22px;border-radius:var(--radius);background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.02));border:1px solid rgba(245,182,66,.2);text-align:center;position:relative;overflow:hidden}
+.stat b{display:block;font-family:"Playfair Display",serif;font-size:clamp(42px,5vw,64px);line-height:1;font-weight:900}
+.stat span{color:var(--muted);font-size:15px}
+.stat::before{content:"";position:absolute;inset:auto -40% -60% -40%;height:120%;background:radial-gradient(circle,rgba(245,182,66,.18),transparent 60%)}
+
+/* features */
+.features{background:radial-gradient(ellipse at top,rgba(15,91,62,.35),transparent 60%),var(--ink)}
+.fgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:56px}
+.card{position:relative;padding:32px 28px 30px;border-radius:var(--radius);background:linear-gradient(165deg,#2a170d,#1a0d07);border:1px solid rgba(245,182,66,.16);transform-style:preserve-3d;transition:transform .15s ease-out,border-color .3s,box-shadow .3s;overflow:hidden}
+.card:hover{border-color:rgba(245,182,66,.55);box-shadow:0 24px 50px rgba(0,0,0,.5),0 0 40px rgba(245,182,66,.12)}
+.card::before{content:"";position:absolute;inset:0;background:radial-gradient(400px circle at var(--mx,50%) var(--my,50%),rgba(245,182,66,.16),transparent 45%);opacity:0;transition:opacity .3s}
+.card:hover::before{opacity:1}
+.card .ic{width:62px;height:62px;border-radius:18px;display:grid;place-items:center;font-size:30px;margin-bottom:20px;background:linear-gradient(145deg,var(--a,#e0343f),var(--b,#8f1620));box-shadow:0 10px 24px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.3);transform:translateZ(40px)}
+.card h3{font-size:22px;font-weight:800;margin-bottom:8px;transform:translateZ(30px)}
+.card p{color:var(--muted);font-size:15.5px;transform:translateZ(20px)}
+.card .tag{position:absolute;top:18px;right:18px;font-size:11px;font-weight:800;letter-spacing:1px;padding:5px 10px;border-radius:999px;background:rgba(61,220,132,.15);color:#7cf0b0;border:1px solid rgba(61,220,132,.35)}
+
+/* demo rack */
+.demo{background:linear-gradient(180deg,var(--ink),#0d2a1e 40%,#0d2a1e 60%,var(--ink))}
+.demo-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:50px;align-items:center}
+.felt{position:relative;padding:28px;border-radius:28px;background:radial-gradient(ellipse at 50% 30%,#1a7a55,#0c4630 70%);box-shadow:inset 0 0 80px rgba(0,0,0,.5),0 30px 70px rgba(0,0,0,.55);border:8px solid #5b3820;outline:2px solid rgba(245,182,66,.35);outline-offset:-14px}
+.felt-top{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.gosterge{display:flex;align-items:center;gap:12px;color:var(--cream);font-weight:600;font-size:14px}
+.gosterge .tile{--tw:40px;font-size:21px}
+.meter{display:flex;gap:10px}
+.meter div{padding:8px 14px;border-radius:12px;background:rgba(0,0,0,.35);font-weight:800;font-size:15px;border:1px solid rgba(255,255,255,.12);transition:all .3s;white-space:nowrap}
+.meter div.ok{background:rgba(61,220,132,.2);border-color:#3ddc84;color:#9ff5c6;box-shadow:0 0 20px rgba(61,220,132,.35)}
+.rack{position:relative;width:100%;padding:12px 10px 18px;border-radius:16px;background:linear-gradient(180deg,#a8703f,#7b4b25 55%,#5e371a);box-shadow:inset 0 2px 0 rgba(255,255,255,.25),inset 0 -6px 0 rgba(0,0,0,.25),0 18px 30px rgba(0,0,0,.5)}
+.rack-inner{position:relative;width:100%}
+.rack-shelf{position:absolute;left:-10px;right:-10px;height:8px;background:linear-gradient(180deg,#5e371a,#3f2410);border-radius:3px}
+.rack .tile{position:absolute;left:0;top:0;transition:transform .75s cubic-bezier(.34,1.4,.5,1),box-shadow .4s;cursor:grab}
+.rack .tile.lit{box-shadow:inset 0 -5px 0 #d4bd8d,0 0 0 3px var(--gold),0 0 22px rgba(245,182,66,.85)}
+.rack .tile.okey{background:linear-gradient(165deg,#fff7d6,#ffe39a 60%,#f2c45a)}
+.rack .tile.okey::before{content:"OKEY";position:absolute;bottom:6%;font-size:.2em;letter-spacing:.5px;color:#8a5a00;font-weight:800}
+.rack .tile.okey::after{display:none}
+.demo-btns{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:10px;padding:14px 22px;border-radius:14px;border:1px solid rgba(245,182,66,.45);background:rgba(245,182,66,.1);color:var(--cream);font:800 15px Outfit,sans-serif;cursor:pointer;transition:all .2s}
+.btn:hover{background:rgba(245,182,66,.22);transform:translateY(-2px)}
+.btn.primary{background:linear-gradient(135deg,var(--gold2),var(--gold) 45%,var(--amber));color:var(--ink);border:0;box-shadow:0 10px 26px rgba(245,182,66,.35)}
+.demo-msg{margin-top:18px;min-height:28px;font-weight:600;color:var(--gold2)}
+
+/* tables showcase */
+.tabs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:40px 0 28px}
+.tabs button{padding:12px 22px;border-radius:999px;border:1px solid rgba(245,182,66,.35);background:transparent;color:var(--cream);font:700 15px Outfit,sans-serif;cursor:pointer;transition:all .25s}
+.tabs button.active{background:var(--gold);color:var(--ink);box-shadow:0 8px 26px rgba(245,182,66,.4)}
+.showcase{position:relative;aspect-ratio:2.17/1;border-radius:28px;overflow:hidden;box-shadow:0 40px 90px rgba(0,0,0,.6),0 0 0 1px rgba(245,182,66,.3);background:#000}
+.showcase img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transform:scale(1.08);transition:opacity 1s,transform 6s ease-out}
+.showcase img.on{opacity:1;transform:scale(1)}
+.showcase .cap{position:absolute;left:24px;bottom:22px;padding:12px 18px;border-radius:14px;background:rgba(20,10,6,.75);backdrop-filter:blur(8px);font-weight:700;border:1px solid rgba(245,182,66,.35)}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;margin-top:60px;counter-reset:s}
+.step{position:relative;padding:34px 24px 28px;border-radius:var(--radius);background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08)}
+.step::before{counter-increment:s;content:counter(s);position:absolute;top:-26px;left:24px;width:54px;height:72px;display:grid;place-items:center;border-radius:10px;font-weight:900;font-size:30px;background:linear-gradient(165deg,#fffaf0,#e9d8b2);box-shadow:inset 0 -4px 0 #d4bd8d,0 10px 20px rgba(0,0,0,.4);color:var(--c,var(--red))}
+.step:nth-child(2){--c:var(--blue)}.step:nth-child(3){--c:var(--orange)}.step:nth-child(4){--c:var(--black)}
+.step h3{margin-top:40px;font-size:21px;font-weight:800}
+.step p{color:var(--muted);font-size:15px;margin-top:6px}
+
+/* videos */
+.vids{display:flex;justify-content:center;gap:clamp(18px,4vw,60px);margin-top:60px;flex-wrap:wrap;perspective:1400px}
+.vids .phone{width:min(260px,70vw);transform:none}
+.vids .phone:nth-child(1){transform:rotateY(18deg) translateZ(-40px)}
+.vids .phone:nth-child(3){transform:rotateY(-18deg) translateZ(-40px)}
+.vids .phone:hover{transform:scale(1.04)}
+.vids .phone{transition:transform .5s}
+.vplay{position:absolute;inset:0;display:grid;place-items:center;z-index:2;background:rgba(0,0,0,.25);cursor:pointer;transition:opacity .3s;border:0;color:#fff}
+.vplay span{width:70px;height:70px;border-radius:50%;background:rgba(245,182,66,.9);display:grid;place-items:center;font-size:26px;color:var(--ink);box-shadow:0 0 0 10px rgba(245,182,66,.25)}
+.playing .vplay{opacity:0;pointer-events:none}
+.still img{animation:kenburns 14s ease-in-out infinite alternate}
+.mute{position:absolute;right:14px;bottom:14px;z-index:3;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer}
+
+/* gallery */
+.masonry{columns:3 300px;column-gap:18px;margin-top:56px}
+.masonry figure{break-inside:avoid;margin-bottom:18px;border-radius:20px;overflow:hidden;position:relative;cursor:zoom-in;box-shadow:0 20px 40px rgba(0,0,0,.45)}
+.masonry img{width:100%;transition:transform .8s cubic-bezier(.2,.7,.2,1),filter .5s;filter:saturate(1.05)}
+.masonry figure:hover img{transform:scale(1.07);filter:saturate(1.25) brightness(1.08)}
+.masonry figure::after{content:"⤢";position:absolute;right:14px;top:14px;width:36px;height:36px;display:grid;place-items:center;border-radius:50%;background:rgba(20,10,6,.7);opacity:0;transition:opacity .3s}
+.masonry figure:hover::after{opacity:1}
+#lightbox{position:fixed;inset:0;z-index:300;background:rgba(8,4,2,.93);display:none;place-items:center;padding:24px;cursor:zoom-out}
+#lightbox.open{display:grid;animation:fade .3s}
+#lightbox img{max-height:90vh;border-radius:16px;box-shadow:0 30px 90px rgba(0,0,0,.8)}
+@keyframes fade{from{opacity:0}}
+
+/* avatars */
+.people{overflow:hidden}
+.av-row{display:flex;gap:18px;width:max-content;animation:marq 60s linear infinite;margin-top:18px}
+.av-row.r2{animation-direction:reverse;animation-duration:70s}
+.av-row img{width:96px;height:96px;border-radius:50%;object-fit:cover;border:3px solid rgba(245,182,66,.6);box-shadow:0 10px 24px rgba(0,0,0,.45);background:#2a170d}
+.gifts{display:flex;flex-wrap:wrap;justify-content:center;gap:14px;margin-top:50px}
+.gifts img{width:62px;height:62px;object-fit:contain;filter:drop-shadow(0 8px 12px rgba(0,0,0,.5));animation:bob 3s ease-in-out infinite;animation-delay:calc(var(--i) * -.23s);transition:transform .2s}
+.gifts img:hover{transform:scale(1.4) rotate(-8deg)}
+@keyframes bob{50%{translate:0 -10px}}
+
+/* final cta */
+.final{text-align:center;overflow:hidden;isolation:isolate}
+.final::before{content:"";position:absolute;inset:0;z-index:-2;background:url(assets/img/kahvehane-night.jpg) center/cover;opacity:.35;filter:blur(2px)}
+.final::after{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(ellipse at center,rgba(20,10,6,.4),var(--ink) 75%)}
+.final .logo-big{width:170px;height:170px;border-radius:38px;margin:0 auto 26px;box-shadow:0 0 0 3px rgba(245,182,66,.6),0 30px 80px rgba(0,0,0,.6),0 0 80px rgba(245,182,66,.35);animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.05) rotate(-2deg)}}
+.final .stores{justify-content:center;margin-top:36px}
+.qrs{display:flex;justify-content:center;gap:26px;margin-top:40px;flex-wrap:wrap}
+.qr{padding:14px;border-radius:18px;background:#fff;color:#111;font-weight:800;font-size:13px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,.5)}
+.qr div{width:120px;height:120px;margin-bottom:8px}
+.qr canvas,.qr img{width:120px!important;height:120px!important}
+
+footer{padding:40px clamp(16px,4vw,48px);border-top:1px solid rgba(245,182,66,.15);display:flex;flex-wrap:wrap;gap:18px;justify-content:space-between;align-items:center;color:var(--muted);font-size:14px}
+footer .links{display:flex;gap:20px;flex-wrap:wrap}
+footer a:hover{color:var(--gold)}
+
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:400}
+
+/* ---------- responsive ---------- */
+@media (max-width:980px){
+  .hero-inner{grid-template-columns:1fr;text-align:center;padding-top:110px}
+  .hero p.lead{margin-left:auto;margin-right:auto}
+  .stores,.trust{justify-content:center}
+  .eyebrow{margin:0 auto}
+  .phone{transform:none}
+  .fgrid{grid-template-columns:1fr 1fr}
+  .stats{grid-template-columns:1fr 1fr}
+  .steps{grid-template-columns:1fr 1fr;row-gap:50px}
+  .demo-grid{grid-template-columns:1fr}
+  .navlinks{display:none}
+  .lang{margin-left:auto}
+}
+@media (max-width:640px){
+  .fgrid,.steps{grid-template-columns:1fr}
+  .store{min-width:0;flex:1 1 100%;justify-content:center}
+  .nav-cta{display:none}
+  .brand{font-size:16px;white-space:nowrap}
+  .brand img{width:34px;height:34px}
+  .lang-btn{padding:8px 11px}
+  .showcase{aspect-ratio:4/3}
+  .felt{padding:16px;border-width:6px}
+  .vids .phone:nth-child(1),.vids .phone:nth-child(3){transform:none}
+  .av-row img{width:72px;height:72px}
+  .floaters .tile{--tw:40px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div id="glow"></div>
+<canvas id="confetti"></canvas>
+
+<nav id="nav">
+  <a href="#top" class="brand"><img data-src-tr="assets/img/logo-tr.jpg" data-src-en="assets/img/logo-en.jpg" src="assets/img/logo-tr.jpg" alt=""><span data-i18n="brand">Müdavim 101</span></a>
+  <div class="navlinks">
+    <a href="#features" data-i18n="nav.features">Özellikler</a>
+    <a href="#demo" data-i18n="nav.demo">Dene</a>
+    <a href="#tables" data-i18n="nav.tables">Masalar</a>
+    <a href="#how" data-i18n="nav.how">Nasıl Oynanır</a>
+    <a href="#gallery" data-i18n="nav.gallery">Galeri</a>
+  </div>
+  <div class="lang" id="lang">
+    <button class="lang-btn" id="langBtn" aria-haspopup="listbox" aria-expanded="false">
+      <span id="langFlag"><svg class="flag" viewBox="0 0 30 20" width="22" height="15"><rect width="30" height="20" rx="2" fill="#E30A17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#E30A17"/><path fill="#fff" d="m16.2 10 4.6-1.5-2.8 3.9V7.6l2.8 3.9z"/></svg></span><span id="langLabel">Türkçe</span>
+      <svg class="chev" width="12" height="12" viewBox="0 0 12 12"><path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+    <div class="lang-menu" role="listbox">
+      <button data-lang="tr"><svg class="flag" viewBox="0 0 30 20" width="22" height="15"><rect width="30" height="20" rx="2" fill="#E30A17"/><circle cx="11" cy="10" r="5" fill="#fff"/><circle cx="12.3" cy="10" r="4" fill="#E30A17"/><path fill="#fff" d="m16.2 10 4.6-1.5-2.8 3.9V7.6l2.8 3.9z"/></svg>Türkçe</button>
+      <button data-lang="en"><svg class="flag" viewBox="0 0 60 30" width="22" height="15"><clipPath id="u"><path d="M0 0v30h60V0z"/></clipPath><clipPath id="v"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><g clip-path="url(#u)"><path d="M0 0v30h60V0z" fill="#012169"/><path d="M0 0l60 30m0-30L0 30" stroke="#fff" stroke-width="6"/><path d="M0 0l60 30m0-30L0 30" clip-path="url(#v)" stroke="#C8102E" stroke-width="4"/><path d="M30 0v30M0 15h60" stroke="#fff" stroke-width="10"/><path d="M30 0v30M0 15h60" stroke="#C8102E" stroke-width="6"/></g></svg>English</button>
+    </div>
+  </div>
+  <a href="#download" class="nav-cta" data-i18n="nav.cta">Hemen Oyna</a>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="top">
+  <div class="hero-bg" id="heroBg"></div>
+  <canvas id="embers"></canvas>
+  <div class="floaters" id="floaters"></div>
+  <div class="hero-inner">
+    <div>
+      <span class="eyebrow reveal"><span class="dot"></span><span data-i18n="hero.eyebrow">Gerçek rakipler şu an masada</span></span>
+      <h1 class="title reveal d1"><span class="shine" data-i18n="hero.title">Müdavim</span><span class="shine num">101 Okey</span></h1>
+      <div class="rotator reveal d2"><span id="rot"></span><span class="cursor"></span></div>
+      <p class="lead reveal d2" data-i18n="hero.lead">Çınaraltında çay, tahta ıstaka, taşların tıkırtısı… Sevilen kahvehane oyunu 101 Okey şimdi cebinde. Masaya otur, taşlarını diz, rakiplerini geride bırak!</p>
+      <div class="stores reveal d3">
+        <a class="store" href="https://play.google.com/store/apps/details?id=com.mestal.mudavim.o101" target="_blank" rel="noopener" data-confetti>
+          <svg viewBox="0 0 24 24"><path fill="#34A853" d="M3.6 1.8 13.8 12 3.6 22.2a1.6 1.6 0 0 1-.6-1.3V3.1c0-.5.2-1 .6-1.3z"/><path fill="#FBBC04" d="m17.3 8.5-3.5 3.5 3.5 3.5 4-2.3c1-.6 1-2 0-2.5z"/><path fill="#4285F4" d="M3.6 1.8c.4-.3 1-.4 1.6-.1l12.1 6.8-3.5 3.5z"/><path fill="#EA4335" d="m13.8 12 3.5 3.5-12.1 6.8c-.6.3-1.2.2-1.6-.1z"/></svg>
+          <span><small data-i18n="store.gp.s">Hemen indir</small><b>Google Play</b></span>
+        </a>
+        <a class="store" href="https://apps.apple.com/tr/app/turkish-rummy-101/id6826441163" target="_blank" rel="noopener" data-confetti>
+          <svg viewBox="0 0 24 24" fill="#fff"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.8-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.8 1.2 1.8 2.6 3.1 2.5 1.3 0 1.7-.8 3.2-.8s1.9.8 3.2.8c1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8 0 0-2.5-1-2.5-4.2zM13.9 4.9c.7-.8 1.2-2 1-3.1-1 0-2.2.7-2.9 1.5-.6.7-1.2 1.9-1 3 1.1.1 2.2-.6 2.9-1.4z"/></svg>
+          <span><small data-i18n="store.as.s">App Store'dan indir</small><b>App Store</b></span>
+        </a>
+        <a class="store web" href="https://mudavim-101.onrender.com/" target="_blank" rel="noopener" data-confetti>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="9.5"/><path d="M2.5 12h19M12 2.5c2.6 2.8 3.8 6 3.8 9.5s-1.2 6.7-3.8 9.5c-2.6-2.8-3.8-6-3.8-9.5S9.4 5.3 12 2.5z"/></svg>
+          <span><small data-i18n="store.web.s">İndirmeden oyna</small><b data-i18n="store.web.b">Tarayıcıda Oyna</b></span>
+        </a>
+      </div>
+      <div class="trust reveal d3">
+        <span><i>✦</i><span data-i18n="trust.1">Tamamen ücretsiz</span></span>
+        <span><i>✦</i><span data-i18n="trust.2">Misafir girişiyle anında başla</span></span>
+        <span><i>✦</i><span data-i18n="trust.3">Türkçe & English</span></span>
+      </div>
+    </div>
+    <div class="phone-wrap reveal d2">
+      <div class="halo"></div>
+      <div class="phone" id="heroPhone">
+        <div class="screen">
+          <video src="assets/video/kamp.mp4" poster="assets/img/sokak-vert.jpg" autoplay muted loop playsinline preload="metadata"></video>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-hint"><div class="m"></div><span data-i18n="hero.scroll">Kaydır</span></div>
+</header>
+
+<div class="marquee"><div class="track" id="mq1"></div></div>
+<div class="marquee alt"><div class="track" id="mq2"></div></div>
+
+<!-- ================= STATS ================= -->
+<section id="stats">
+  <div class="wrap center">
+    <div class="kicker reveal" data-i18n="stats.k">Masada neler var?</div>
+    <h2 class="reveal d1" data-i18n-html="stats.h">Kahvehanenin ruhu, <em>dijitalin hızı</em></h2>
+    <p class="sub reveal d2" data-i18n="stats.p">Gerçek 101 kuralları, çınaraltı sohbeti ve tek dokunuşla masaya oturmanın keyfi bir arada.</p>
+    <div class="stats">
+      <div class="stat reveal"><b class="shine" data-count="106">0</b><span data-i18n="stats.1">taş, 4 renk</span></div>
+      <div class="stat reveal d1"><b class="shine" data-count="101">0</b><span data-i18n="stats.2">ile el açılır</span></div>
+      <div class="stat reveal d2"><b class="shine" data-count="48" data-plus>0</b><span data-i18n="stats.3">farklı avatar</span></div>
+      <div class="stat reveal d3"><b class="shine" data-count="30">0</b><span data-i18n="stats.4">masaya hediye</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="features" id="features">
+  <div class="wrap">
+    <div class="kicker reveal" data-i18n="feat.k">Neden Müdavim?</div>
+    <h2 class="reveal d1" data-i18n-html="feat.h">Bir kere otur,<br><em>müdavim</em> ol.</h2>
+    <div class="fgrid" id="fgrid"></div>
+  </div>
+</section>
+
+<!-- ================= DEMO ================= -->
+<section class="demo" id="demo">
+  <div class="wrap demo-grid">
+    <div>
+      <div class="kicker reveal" data-i18n="demo.k">Hemen dene</div>
+      <h2 class="reveal d1" data-i18n-html="demo.h">Istakanı <em>tek dokunuşla</em> diz</h2>
+      <p class="sub reveal d2" data-i18n="demo.p">Yardımlı modda taşların seri ya da çift olarak otomatik dizilir; sayaç açmana ne kaldığını anında gösterir. Bir dene!</p>
+      <div class="demo-btns reveal d3">
+        <button class="btn primary" data-arrange="seri">▦ <span data-i18n="demo.seri">Seri Diz</span></button>
+        <button class="btn" data-arrange="cift">⚏ <span data-i18n="demo.cift">Çift Diz</span></button>
+        <button class="btn" data-arrange="mix">⟲ <span data-i18n="demo.mix">Karıştır</span></button>
+      </div>
+      <div class="demo-msg" id="demoMsg"></div>
+    </div>
+    <div class="felt reveal d2">
+      <div class="felt-top">
+        <div class="gosterge"><div class="tile orange">4</div><span data-i18n-html="demo.gosterge">Gösterge: <b>Turuncu 4</b> → Okey: <b>Turuncu 5</b></span></div>
+        <div class="meter"><div id="mSeri">Seri: 0</div><div id="mCift">Çift: 0</div></div>
+      </div>
+      <div class="rack"><div class="rack-inner" id="rack"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TABLES ================= -->
+<section id="tables">
+  <div class="wrap center">
+    <div class="kicker reveal" data-i18n="tables.k">Masa temaları</div>
+    <h2 class="reveal d1" data-i18n-html="tables.h">Bugün <em>nerede</em> oynuyoruz?</h2>
+    <p class="sub reveal d2" data-i18n="tables.p">Eski bir İstanbul kahvehanesi, tropik bir plaj ya da mum ışığında gizemli bir gece… Masanı ruh haline göre seç.</p>
+    <div class="tabs reveal" id="tabs">
+      <button class="active" data-i="0" data-i18n="tables.t1">☕ Kahvehane</button>
+      <button data-i="1" data-i18n="tables.t2">🏝️ Plaj</button>
+      <button data-i="2" data-i18n="tables.t3">🕯️ Gece</button>
+    </div>
+    <div class="showcase reveal" id="showcase">
+      <img class="on" src="assets/img/play-kahvehane.jpg" alt="">
+      <img src="assets/img/play-beach.jpg" alt="">
+      <img src="assets/img/play-night.jpg" alt="">
+      <div class="cap" id="showcap"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW ================= -->
+<section id="how" style="background:radial-gradient(ellipse at 20% 50%,rgba(224,52,63,.14),transparent 55%),radial-gradient(ellipse at 80% 50%,rgba(29,111,224,.14),transparent 55%)">
+  <div class="wrap">
+    <div class="kicker reveal" data-i18n="how.k">Nasıl oynanır?</div>
+    <h2 class="reveal d1" data-i18n-html="how.h">Dört adımda <em>101 ustası</em></h2>
+    <p class="sub reveal d2" data-i18n="how.p">106 taş, 4 oyuncu, bol strateji. Kuralları bilmiyorsan dert etme; oyunun içindeki kural rehberi her adımda yanında.</p>
+    <div class="steps">
+      <div class="step reveal"><h3 data-i18n="how.1t">Diz</h3><p data-i18n="how.1p">21 taşını aynı renk sıralı seriler ya da aynı sayı farklı renk gruplar halinde diz. Başlayan oyuncu 22 taşla başlar.</p></div>
+      <div class="step reveal d1"><h3 data-i18n="how.2t">Aç</h3><p data-i18n="how.2p">Perlerinin toplamı 101'e ulaşınca ya da 5 çiftin olunca elini aç. Katlamalı masada çıta her açılışla yükselir!</p></div>
+      <div class="step reveal d2"><h3 data-i18n="how.3t">İşle</h3><p data-i18n="how.3p">Elini açtıktan sonra taşlarını masadaki perlere işle. Okeyi akıllıca kullan; yerdeki okeyi alıp cezayı kes!</p></div>
+      <div class="step reveal d3"><h3 data-i18n="how.4t">Bitir</h3><p data-i18n="how.4p">Son taşını atıp eli bitir. Çiftten ya da okey atarak bitirirsen rakiplerin ceza puanı katlanır.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VIDEOS ================= -->
+<section id="videos" style="background:linear-gradient(180deg,var(--ink),#1d0f08,var(--ink))">
+  <div class="wrap center">
+    <div class="kicker reveal" data-i18n="vid.k">İzle</div>
+    <h2 class="reveal d1" data-i18n-html="vid.h">Masada <em>keyif</em> başka</h2>
+    <div class="vids" id="vids">
+      <div class="phone reveal"><div class="screen"><video data-src="assets/video/akif-abi.mp4" poster="assets/img/kahvehane-vert.jpg" muted loop playsinline preload="none"></video><button class="vplay"><span>▶</span></button><button class="mute" aria-label="sound">🔇</button></div></div>
+      <div class="phone reveal d1"><div class="screen still"><img src="assets/img/beach-friends.jpg" alt="" loading="lazy"></div></div>
+      <div class="phone reveal d2"><div class="screen still"><img src="assets/img/ad-vertical-tr.jpg" alt="" loading="lazy"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PEOPLE ================= -->
+<section class="people" id="people">
+  <div class="wrap center">
+    <div class="kicker reveal" data-i18n="ppl.k">Masanın müdavimleri</div>
+    <h2 class="reveal d1" data-i18n-html="ppl.h">Avatarını seç, <em>hediyeni</em> gönder</h2>
+    <p class="sub reveal d2" data-i18n="ppl.p">Kırktan fazla avatar, simitten Türk kahvesine masaya uçan hediyeler, hazır mesajlar ve hareketli emojilerle masada sohbet hiç bitmez.</p>
+  </div>
+  <div class="av-row" id="av1"></div>
+  <div class="av-row r2" id="av2"></div>
+  <div class="wrap"><div class="gifts" id="gifts"></div></div>
+</section>
+
+<!-- ================= GALLERY ================= -->
+<section id="gallery">
+  <div class="wrap">
+    <div class="kicker reveal" data-i18n="gal.k">Galeri</div>
+    <h2 class="reveal d1" data-i18n-html="gal.h">İstanbul akşamı, <em>bir çay</em>, bir el 101</h2>
+    <div class="masonry" id="masonry"></div>
+  </div>
+</section>
+
+<!-- ================= FINAL ================= -->
+<section class="final" id="download">
+  <div class="wrap">
+    <img class="logo-big reveal" data-src-tr="assets/img/logo-tr.jpg" data-src-en="assets/img/logo-en.jpg" src="assets/img/logo-tr.jpg" alt="">
+    <h2 class="reveal d1" data-i18n-html="fin.h">Masa hazır, <em>çaylar</em> taze.</h2>
+    <p class="sub reveal d2" data-i18n="fin.p">Şimdi ücretsiz indir ya da hiç indirmeden tarayıcında oyna. Seni masada bekliyoruz!</p>
+    <div class="stores reveal d3" id="stores2"></div>
+    <div class="qrs reveal d3" id="qrs">
+      <div class="qr"><div id="qrA"></div>Google Play</div>
+      <div class="qr"><div id="qrI"></div>App Store</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="brand"><img data-src-tr="assets/img/logo-tr.jpg" data-src-en="assets/img/logo-en.jpg" src="assets/img/logo-tr.jpg" alt=""><span data-i18n="brand">Müdavim 101</span></div>
+  <div class="links">
+    <a href="https://play.google.com/store/apps/details?id=com.mestal.mudavim.o101" target="_blank" rel="noopener">Google Play</a>
+    <a href="https://apps.apple.com/tr/app/turkish-rummy-101/id6826441163" target="_blank" rel="noopener">App Store</a>
+    <a href="https://mudavim-101.onrender.com/" target="_blank" rel="noopener">Web</a>
+  </div>
+  <div>© <span id="yr"></span> <span data-i18n="brand">Müdavim 101</span></div>
+</footer>
+
+<div id="lightbox"><img alt=""></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+const LINKS={android:"https://play.google.com/store/apps/details?id=com.mestal.mudavim.o101",ios:"https://apps.apple.com/tr/app/turkish-rummy-101/id6826441163",web:"https://mudavim-101.onrender.com/"};
+
+/* ================= i18n ================= */
+const I18N={
+ tr:{
+  brand:"Müdavim 101","doc.title":"Müdavim 101 Okey — Kahvehane keyfi cebinde",
+  "nav.features":"Özellikler","nav.demo":"Dene","nav.tables":"Masalar","nav.how":"Nasıl Oynanır","nav.gallery":"Galeri","nav.cta":"Hemen Oyna",
+  "hero.eyebrow":"Gerçek rakipler şu an masada","hero.title":"Müdavim",
+  "hero.lead":"Çınaraltında çay, tahta ıstaka, taşların tıkırtısı… Sevilen kahvehane oyunu 101 Okey şimdi cebinde. Masaya otur, taşlarını diz, rakiplerini geride bırak!",
+  "hero.scroll":"Kaydır",
+  rot:["Hemen 101 Okey oyna","Gerçek rakiplerle eşleş","Kahvehane keyfi cebinde","Taşlarını diz, stratejini kur","Ücretsiz 101 oyna"],
+  "store.gp.s":"Hemen indir","store.as.s":"App Store'dan indir","store.web.s":"İndirmeden oyna","store.web.b":"Tarayıcıda Oyna",
+  "trust.1":"Tamamen ücretsiz","trust.2":"Misafir girişiyle anında başla","trust.3":"Türkçe & English",
+  mq1:["101 OKEY","GERÇEK RAKİPLER","EŞLİ & TEK","KATLAMALI","YARDIMLI MOD","HEMEN OYNA","ÇİFTE GİT","OKEYİ ÇAL"],
+  mq2:["Çay demlendi","Istaka hazır","Gösterge açıldı","Seriler dizildi","Çiftler sayıldı","El bitti, yenisi gelsin"],
+  "stats.k":"Masada neler var?","stats.h":"Kahvehanenin ruhu, <em>dijitalin hızı</em>",
+  "stats.p":"Gerçek 101 kuralları, çınaraltı sohbeti ve tek dokunuşla masaya oturmanın keyfi bir arada.",
+  "stats.1":"taş, 4 renk","stats.2":"ile el açılır","stats.3":"farklı avatar","stats.4":"masaya hediye",
+  "feat.k":"Neden Müdavim?","feat.h":"Bir kere otur,<br><em>müdavim</em> ol.",
+  feats:[
+   ["⚡","Hemen Oyna","Tek dokunuşla uygun masayı bul; beklemeden gerçek rakiplerle eşleş ve oyuna başla.","#f5b642","#b26a10","CANLI"],
+   ["👥","Eşli & Tek","Tek başına ya da karşındaki ortağınla takım olarak oyna. Takım arkadaşının okeyini çalmak cezasız!","#1d6fe0","#0b3c86"],
+   ["📈","Katlamalı & Katlamasız","Katlamalı masada çıta her açılışta yükselir; katlamasızda 101 hep yeter. Seçim senin.","#e0343f","#8f1620"],
+   ["🧩","Yardımlı & Yardımsız","Taşların otomatik dizilsin ya da ıstakayı kendin yönet. Yeni başlayan da usta da kendini evinde hisseder.","#0f8a5f","#06402b"],
+   ["🤖","Akıllı Botlar","Masa boş kalmaz. Gerçek kurallarla oynayan, stratejik düşünen botlar her an hazır.","#8b5cf6","#4c1d95"],
+   ["🎁","Hediye, Emoji & Sohbet","Simit, çay, Türk kahvesi… Masaya hediye uçur, hazır mesajlar ve hareketli emojilerle atış.","#f08a12","#9a4d00"],
+   ["🎨","Masa Temaları","Kahvehane, plaj, gece… Masa tasarımını değiştir, her eli farklı bir atmosferde oyna.","#14b8a6","#0f5e57"],
+   ["🔄","Kaldığın Yerden Devam","Bağlantın mı koptu, uygulamadan mı çıktın? Tekrar gel, taşların ve sıran seni bekliyor.","#64748b","#1e293b"],
+   ["🏆","Kürsü & Madalyalar","Oyun sonunda kürsüye çık, taç ve madalyanı avatarınla masadan masaya taşı.","#eab308","#854d0e"]
+  ],
+  "demo.k":"Hemen dene","demo.h":"Istakanı <em>tek dokunuşla</em> diz",
+  "demo.p":"Yardımlı modda taşların seri ya da çift olarak otomatik dizilir; sayaç açmana ne kaldığını anında gösterir. Bir dene!",
+  "demo.seri":"Seri Diz","demo.cift":"Çift Diz","demo.mix":"Karıştır",
+  "demo.gosterge":"Gösterge: <b>Turuncu 4</b> → Okey: <b>Turuncu 5</b>",
+  "demo.mSeri":"Seri","demo.mCift":"Çift",
+  "demo.okSeri":"🎉 Seri toplamı 101! Elini açabilirsin.","demo.okCift":"🎉 5 çift tamam! Çiftten açabilirsin.","demo.mixMsg":"Taşlar karıştı… Şimdi bir dizme seçeneği dene!",
+  "tables.k":"Masa temaları","tables.h":"Bugün <em>nerede</em> oynuyoruz?",
+  "tables.p":"Eski bir İstanbul kahvehanesi, tropik bir plaj ya da mum ışığında gizemli bir gece… Masanı ruh haline göre seç.",
+  "tables.t1":"☕ Kahvehane","tables.t2":"🏝️ Plaj","tables.t3":"🕯️ Gece",
+  caps:["Mahallenin kahvehanesinde bir el","Kumda ayaklar, ıstakada seriler","Mum ışığında gizemli bir masa"],
+  "how.k":"Nasıl oynanır?","how.h":"Dört adımda <em>101 ustası</em>",
+  "how.p":"106 taş, 4 oyuncu, bol strateji. Kuralları bilmiyorsan dert etme; oyunun içindeki kural rehberi her adımda yanında.",
+  "how.1t":"Diz","how.1p":"21 taşını aynı renk sıralı seriler ya da aynı sayı farklı renk gruplar halinde diz. Başlayan oyuncu 22 taşla başlar.",
+  "how.2t":"Aç","how.2p":"Perlerinin toplamı 101'e ulaşınca ya da 5 çiftin olunca elini aç. Katlamalı masada çıta her açılışla yükselir!",
+  "how.3t":"İşle","how.3p":"Elini açtıktan sonra taşlarını masadaki perlere işle. Okeyi akıllıca kullan; yerdeki okeyi alıp cezayı kes!",
+  "how.4t":"Bitir","how.4p":"Son taşını atıp eli bitir. Çiftten ya da okey atarak bitirirsen rakiplerin ceza puanı katlanır.",
+  "vid.k":"İzle","vid.h":"Masada <em>keyif</em> başka",
+  "ppl.k":"Masanın müdavimleri","ppl.h":"Avatarını seç, <em>hediyeni</em> gönder",
+  "ppl.p":"Kırktan fazla avatar, simitten Türk kahvesine masaya uçan hediyeler, hazır mesajlar ve hareketli emojilerle masada sohbet hiç bitmez.",
+  "gal.k":"Galeri","gal.h":"İstanbul akşamı, <em>bir çay</em>, bir el 101",
+  "fin.h":"Masa hazır, <em>çaylar</em> taze.","fin.p":"Şimdi ücretsiz indir ya da hiç indirmeden tarayıcında oyna. Seni masada bekliyoruz!"
+ },
+ en:{
+  brand:"Turkish Rummy 101","doc.title":"Turkish Rummy: 101 — The coffeehouse classic in your pocket",
+  "nav.features":"Features","nav.demo":"Try it","nav.tables":"Tables","nav.how":"How to Play","nav.gallery":"Gallery","nav.cta":"Play Now",
+  "hero.eyebrow":"Real players at the table right now","hero.title":"Turkish Rummy",
+  "hero.lead":"Tea under the plane tree, a wooden rack, the click of tiles… Türkiye's beloved coffeehouse game 101 Okey is now in your pocket. Take a seat, arrange your tiles and outplay your rivals!",
+  "hero.scroll":"Scroll",
+  rot:["Play 101 Okey now","Match with real players","The coffeehouse in your pocket","Arrange tiles, build your strategy","Play 101 for free"],
+  "store.gp.s":"Get it on","store.as.s":"Download on the","store.web.s":"No download needed","store.web.b":"Play in Browser",
+  "trust.1":"Completely free","trust.2":"Start instantly as a guest","trust.3":"English & Türkçe",
+  mq1:["101 OKEY","REAL OPPONENTS","TEAM & SOLO","DOUBLING","ASSISTED MODE","QUICK PLAY","GO FOR PAIRS","STEAL THE JOKER"],
+  mq2:["Tea is brewed","Rack is ready","Indicator revealed","Runs arranged","Pairs counted","Round over, deal again"],
+  "stats.k":"What's on the table?","stats.h":"The soul of a coffeehouse, <em>the speed of digital</em>",
+  "stats.p":"Authentic 101 rules, coffeehouse banter and the joy of taking a seat with a single tap — all in one.",
+  "stats.1":"tiles, 4 colors","stats.2":"points to open","stats.3":"unique avatars","stats.4":"table gifts",
+  "feat.k":"Why Turkish Rummy 101?","feat.h":"Sit down once,<br><em>become a regular.</em>",
+  feats:[
+   ["⚡","Quick Play","Find the right table in one tap, match with real opponents and start playing without waiting.","#f5b642","#b26a10","LIVE"],
+   ["👥","Team & Solo","Play on your own or team up with the partner across the table. Stealing your teammate's joker costs nothing!","#1d6fe0","#0b3c86"],
+   ["📈","Doubling & Fixed","In doubling tables the bar rises with every opening; in fixed tables 101 is always enough. Your call.","#e0343f","#8f1620"],
+   ["🧩","Assisted & Unassisted","Let your tiles arrange themselves or manage the rack yourself. Beginners and masters both feel at home.","#0f8a5f","#06402b"],
+   ["🤖","Smart Bots","No empty seats. Strategic bots that play by the real rules are always ready.","#8b5cf6","#4c1d95"],
+   ["🎁","Gifts, Emoji & Chat","Simit, tea, Turkish coffee… Send gifts flying across the table and banter with quick messages and animated emoji.","#f08a12","#9a4d00"],
+   ["🎨","Table Themes","Coffeehouse, beach, night… Change the table design and play every round in a new atmosphere.","#14b8a6","#0f5e57"],
+   ["🔄","Pick Up Where You Left","Lost connection or switched apps? Come back — your tiles and your turn are waiting.","#64748b","#1e293b"],
+   ["🏆","Podium & Medals","Climb the podium at the end of the game and carry your crown and medal from table to table.","#eab308","#854d0e"]
+  ],
+  "demo.k":"Try it now","demo.h":"Arrange your rack <em>in one tap</em>",
+  "demo.p":"In assisted mode your tiles are auto-arranged as runs or pairs, and the counter instantly shows how close you are to opening. Give it a try!",
+  "demo.seri":"Arrange Runs","demo.cift":"Arrange Pairs","demo.mix":"Shuffle",
+  "demo.gosterge":"Indicator: <b>Orange 4</b> → Joker: <b>Orange 5</b>",
+  "demo.mSeri":"Runs","demo.mCift":"Pairs",
+  "demo.okSeri":"🎉 Runs total 101! You can open your hand.","demo.okCift":"🎉 5 pairs! You can open with pairs.","demo.mixMsg":"Tiles shuffled… Now try an arrange option!",
+  "tables.k":"Table themes","tables.h":"Where are we <em>playing</em> today?",
+  "tables.p":"An old Istanbul coffeehouse, a tropical beach or a mysterious candle-lit night… Pick a table that fits your mood.",
+  "tables.t1":"☕ Coffeehouse","tables.t2":"🏝️ Beach","tables.t3":"🕯️ Night",
+  caps:["A round at the neighborhood coffeehouse","Toes in the sand, runs on the rack","A mysterious table by candlelight"],
+  "how.k":"How to play","how.h":"Become a <em>101 master</em> in four steps",
+  "how.p":"106 tiles, 4 players, tons of strategy. Don't know the rules? No worries — the in-game rule guide is with you every step.",
+  "how.1t":"Arrange","how.1p":"Group your 21 tiles into same-color runs or same-number sets of different colors. The starting player gets 22 tiles.",
+  "how.2t":"Open","how.2p":"Open your hand when your melds total 101 or you have 5 pairs. In doubling tables the bar rises with each opening!",
+  "how.3t":"Lay off","how.3p":"After opening, add your tiles to the melds on the table. Use the joker wisely — grab it from the board to hand out a penalty!",
+  "how.4t":"Finish","how.4p":"Discard your last tile to finish the round. Finish with pairs or by discarding a joker and your rivals' penalties multiply.",
+  "vid.k":"Watch","vid.h":"The table is <em>where the fun is</em>",
+  "ppl.k":"The regulars","ppl.h":"Pick your avatar, <em>send a gift</em>",
+  "ppl.p":"Over forty avatars, gifts flying across the table from simit to Turkish coffee, quick messages and animated emoji — the conversation never ends.",
+  "gal.k":"Gallery","gal.h":"An Istanbul evening, <em>a cup of tea</em>, a round of 101",
+  "fin.h":"The table's set, <em>the tea is fresh.</em>","fin.p":"Download for free or play right in your browser with no download. See you at the table!"
+ }
+};
+
+let LANG="tr";
+function detectLang(){
+  try{const q=new URLSearchParams(location.search).get("lang");if(q==="tr"||q==="en")return q}catch(e){}
+  try{const s=localStorage.getItem("m101_lang");if(s==="tr"||s==="en")return s}catch(e){}
+  const langs=(navigator.languages&&navigator.languages.length?navigator.languages:[navigator.language||navigator.userLanguage||""]);
+  const first=(langs[0]||"").toLowerCase();
+  if(!first) return "tr";               // tespit edilemezse varsayılan Türkçe
+  return first.startsWith("tr")?"tr":"en";
+}
+function t(k){return I18N[LANG][k]}
+function applyLang(lang,save){
+  LANG=lang;document.documentElement.lang=lang;document.title=t("doc.title");
+  document.querySelectorAll("[data-i18n]").forEach(el=>{const v=t(el.dataset.i18n);if(typeof v==="string")el.textContent=v});
+  document.querySelectorAll("[data-i18n-html]").forEach(el=>{const v=t(el.dataset.i18nHtml);if(typeof v==="string")el.innerHTML=v});
+  document.querySelectorAll("[data-src-tr]").forEach(el=>{el.src=el.dataset["src"+(lang==="tr"?"Tr":"En")]});
+  document.getElementById("langFlag").innerHTML=document.querySelector(`.lang-menu [data-lang="${lang}"] svg`).outerHTML;
+  document.getElementById("langLabel").textContent=lang==="tr"?"Türkçe":"English";
+  document.querySelectorAll(".lang-menu button").forEach(b=>b.classList.toggle("active",b.dataset.lang===lang));
+  if(save){try{localStorage.setItem("m101_lang",lang)}catch(e){}}
+  buildMarquees();buildFeatures();buildGallery();updateMeters();setCaption();restartRotator();
+}
+
+/* language dropdown */
+const langEl=document.getElementById("lang"),langBtn=document.getElementById("langBtn");
+langBtn.addEventListener("click",e=>{e.stopPropagation();const o=langEl.classList.toggle("open");langBtn.setAttribute("aria-expanded",o)});
+document.addEventListener("click",()=>{langEl.classList.remove("open");langBtn.setAttribute("aria-expanded","false")});
+document.querySelectorAll(".lang-menu button").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();langEl.classList.remove("open");applyLang(b.dataset.lang,true)}));
+
+/* ================= rotator (typewriter) ================= */
+let rotTimer=null;
+function restartRotator(){
+  clearTimeout(rotTimer);const el=document.getElementById("rot");let i=0,c=0,del=false;
+  (function tick(){const w=t("rot")[i];
+    if(!del){c++;el.textContent=w.slice(0,c);if(c===w.length){del=true;rotTimer=setTimeout(tick,1900);return}}
+    else{c--;el.textContent=w.slice(0,c);if(c===0){del=false;i=(i+1)%t("rot").length}}
+    rotTimer=setTimeout(tick,del?28:62)})();
+}
+
+/* ================= marquees ================= */
+function buildMarquees(){
+  [["mq1","mq1"],["mq2","mq2"]].forEach(([id,k])=>{const items=t(k);const html=items.map(s=>`<span>${s}</span>`).join("");document.getElementById(id).innerHTML=html+html});
+}
+
+/* ================= features ================= */
+function buildFeatures(){
+  const g=document.getElementById("fgrid");
+  g.innerHTML=t("feats").map((f,i)=>`<div class="card reveal ${["","d1","d2"][i%3]}"><div class="ic" style="--a:${f[3]};--b:${f[4]}">${f[0]}</div>${f[5]?`<span class="tag">● ${f[5]}</span>`:""}<h3>${f[1]}</h3><p>${f[2]}</p></div>`).join("");
+  g.querySelectorAll(".card").forEach(tilt);observeReveals();
+}
+function tilt(card){
+  if(matchMedia("(hover:none)").matches)return;
+  card.addEventListener("mousemove",e=>{const r=card.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+    card.style.transform=`perspective(900px) rotateY(${(x-.5)*12}deg) rotateX(${(.5-y)*12}deg) translateY(-6px)`;card.style.setProperty("--mx",x*100+"%");card.style.setProperty("--my",y*100+"%")});
+  card.addEventListener("mouseleave",()=>card.style.transform="");
+}
+
+/* ================= hero floaters ================= */
+(function(){
+  const f=document.getElementById("floaters");
+  const data=[["1","red",6,18,-14,64],["12","blue",86,14,12,52],["1","red",92,62,-8,46],["7","orange",3,70,10,50],["13","black",48,86,-16,44],["5","orange",78,86,14,40,"star"],["9","blue",30,8,8,36],["11","red",62,6,-10,34]];
+  data.forEach(([n,c,x,y,r,w,s],i)=>{const d=document.createElement("div");d.className=`tile ${c} ${s||""}`;d.textContent=n;
+    d.style.cssText=`left:${x}%;top:${y}%;--r:${r}deg;--tw:${w}px;--d:${7+i%4*1.6}s;--del:${-i*1.3}s;filter:blur(${w<40?1.5:0}px)`;d.dataset.depth=(w/64).toFixed(2);f.appendChild(d)});
+  const phone=document.getElementById("heroPhone"),bg=document.getElementById("heroBg");
+  window.addEventListener("mousemove",e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
+    f.querySelectorAll(".tile").forEach(t=>{t.style.translate=`${-x*40*t.dataset.depth}px ${-y*40*t.dataset.depth}px`});
+    if(innerWidth>980)phone.style.transform=`perspective(1200px) rotateY(${-14+x*16}deg) rotateX(${6-y*12}deg)`;
+    bg.style.translate=`${-x*14}px ${-y*10}px`},{passive:true});
+})();
+
+/* ================= embers ================= */
+(function(){
+  const c=document.getElementById("embers"),ctx=c.getContext("2d");let W,H,P=[];
+  function rs(){W=c.width=c.offsetWidth*devicePixelRatio;H=c.height=c.offsetHeight*devicePixelRatio}rs();addEventListener("resize",rs);
+  const N=matchMedia("(max-width:640px)").matches?40:90;
+  for(let i=0;i<N;i++)P.push(spawn(true));
+  function spawn(init){return{x:Math.random()*W,y:init?Math.random()*H:H+20,r:(Math.random()*2.2+.6)*devicePixelRatio,vy:-(Math.random()*.6+.25)*devicePixelRatio,vx:(Math.random()-.5)*.3,ph:Math.random()*6.28,a:Math.random()*.6+.3}}
+  let vis=true;new IntersectionObserver(([e])=>vis=e.isIntersecting).observe(c);
+  (function loop(){requestAnimationFrame(loop);if(!vis)return;ctx.clearRect(0,0,W,H);
+    for(const p of P){p.y+=p.vy;p.ph+=.02;p.x+=p.vx+Math.sin(p.ph)*.35;if(p.y<-20)Object.assign(p,spawn(false));
+      const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,p.r*4);g.addColorStop(0,`rgba(255,214,130,${p.a})`);g.addColorStop(1,"rgba(255,140,40,0)");
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,p.r*4,0,6.28);ctx.fill()}})();
+})();
+
+/* ================= reveal + counters ================= */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target)}}),{threshold:.14});
+function observeReveals(){document.querySelectorAll(".reveal:not(.in)").forEach(el=>io.observe(el))}
+const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;cio.unobserve(e.target);const el=e.target,to=+el.dataset.count,plus=el.hasAttribute("data-plus");const t0=performance.now();
+  (function step(n){const k=Math.min(1,(n-t0)/1600),v=Math.round(to*(1-Math.pow(1-k,3)));el.textContent=v+(plus&&k===1?"+":"");if(k<1)requestAnimationFrame(step)})(t0)}),{threshold:.5});
+document.querySelectorAll("[data-count]").forEach(el=>cio.observe(el));
+
+/* ================= nav + progress + glow ================= */
+const nav=document.getElementById("nav"),prog=document.getElementById("progress"),glow=document.getElementById("glow");
+addEventListener("scroll",()=>{nav.classList.toggle("scrolled",scrollY>40);prog.style.width=(scrollY/(document.documentElement.scrollHeight-innerHeight)*100)+"%"},{passive:true});
+if(matchMedia("(hover:hover)").matches){addEventListener("mousemove",e=>{glow.style.left=e.clientX+"px";glow.style.top=e.clientY+"px"},{passive:true})}else glow.style.display="none";
+
+/* ================= demo rack ================= */
+const TILES={ // id: [num,color]
+ r3:[3,"red"],ok:[5,"orange"],r5:[5,"red"],r6:[6,"red"],r7:[7,"red"],
+ b9:[9,"blue"],b10:[10,"blue"],b11:[11,"blue"],b12:[12,"blue"],b13:[13,"blue"],
+ k8:[8,"black"],r8:[8,"red"],o8:[8,"orange"],
+ o2a:[2,"orange"],o2b:[2,"orange"],k13a:[13,"black"],k13b:[13,"black"],b1a:[1,"blue"],b1b:[1,"blue"],o11a:[11,"orange"],o11b:[11,"orange"]};
+const _=null;
+const LAYOUT={
+ seri:{rows:[["ok","r5","r6","r7",_,"k8","r8","o8",_,"o11a","r3","o2a","o2b"],["b9","b10","b11","b12","b13",_,"k13a","k13b",_,"b1a","b1b","o11b",_]],lit:["ok","r5","r6","r7","k8","r8","o8","b9","b10","b11","b12","b13"]},
+ cift:{rows:[["r3","ok",_,"o2a","o2b",_,"k13a","k13b",_,"b1a","b1b",_,"b13"],["o11a","o11b",_,"k8","r8","o8","r5","r6","r7","b9","b10","b11","b12"]],lit:["r3","ok","o2a","o2b","k13a","k13b","b1a","b1b","o11a","o11b"]}
+};
+const rack=document.getElementById("rack");let mode="mix",tw=40;
+Object.entries(TILES).forEach(([id,[n,c]])=>{const d=document.createElement("div");d.className=`tile ${c}${id==="ok"?" okey":""}`;d.textContent=n;d.dataset.id=id;rack.appendChild(d)});
+function sizeRack(){const w=rack.clientWidth;const gap=Math.max(2,w*.006);tw=(w-gap*12)/13;rack.style.setProperty("--tw",tw+"px");rack.style.height=(tw*1.38*2+18)+"px";rack._gap=gap;
+  rack.querySelectorAll(".rack-shelf").forEach(s=>s.remove());[0,1].forEach(r=>{const s=document.createElement("div");s.className="rack-shelf";s.style.top=(tw*1.38*(r+1)+r*18+1)+"px";rack.appendChild(s)});
+  place(false)}
+function slots(){if(mode==="mix"){if(!rack._mix){const ids=Object.keys(TILES),pos=[...Array(26).keys()].sort(()=>Math.random()-.5);rack._mix={};ids.forEach((id,i)=>rack._mix[id]=pos[i])}return rack._mix}
+  const m={};LAYOUT[mode].rows.forEach((row,r)=>row.forEach((id,c)=>{if(id)m[id]=r*13+c}));return m}
+function place(){const m=slots(),g=rack._gap||3;const lit=mode==="mix"?[]:LAYOUT[mode].lit;
+  rack.querySelectorAll(".tile").forEach((el,i)=>{const s=m[el.dataset.id],r=Math.floor(s/13),c=s%13;el.style.transform=`translate(${c*(tw+g)}px,${r*(tw*1.38+18)}px)`;el.style.transitionDelay=(i*0.025)+"s";el.classList.toggle("lit",lit.includes(el.dataset.id))})}
+function updateMeters(){const seri=mode==="seri"?101:mode==="cift"?0:0,cift=mode==="cift"?5:0;
+  const ms=document.getElementById("mSeri"),mc=document.getElementById("mCift");ms.textContent=`${t("demo.mSeri")}: ${seri}`;mc.textContent=`${t("demo.mCift")}: ${cift}`;
+  ms.classList.toggle("ok",seri>=101);mc.classList.toggle("ok",cift>=5);
+  document.getElementById("demoMsg").textContent=mode==="seri"?t("demo.okSeri"):mode==="cift"?t("demo.okCift"):(rack._touched?t("demo.mixMsg"):"")}
+document.querySelectorAll("[data-arrange]").forEach(b=>b.addEventListener("click",()=>{mode=b.dataset.arrange;rack._touched=true;if(mode==="mix")rack._mix=null;
+  document.querySelectorAll("[data-arrange]").forEach(x=>x.classList.toggle("primary",x===b));place();updateMeters();
+  if(mode!=="mix"){const r=rack.getBoundingClientRect();setTimeout(()=>burst(r.left+r.width/2,r.top+r.height/2,70),650)}}));
+addEventListener("resize",sizeRack);
+// auto-play the demo once when visible
+new IntersectionObserver(([e],o)=>{if(e.isIntersecting){o.disconnect();setTimeout(()=>{if(!rack._touched){mode="seri";place();updateMeters()}},900)}},{threshold:.6}).observe(rack);
+
+/* ================= tables showcase ================= */
+let showI=0,showTimer;
+function setCaption(){document.getElementById("showcap").textContent=t("caps")[showI]}
+function show(i){showI=i;document.querySelectorAll("#showcase img").forEach((im,k)=>im.classList.toggle("on",k===i));document.querySelectorAll("#tabs button").forEach((b,k)=>b.classList.toggle("active",k===i));setCaption()}
+document.querySelectorAll("#tabs button").forEach(b=>b.addEventListener("click",()=>{show(+b.dataset.i);clearInterval(showTimer);showTimer=setInterval(()=>show((showI+1)%3),5000)}));
+showTimer=setInterval(()=>show((showI+1)%3),5000);
+
+/* ================= videos ================= */
+document.querySelectorAll("#vids .screen:not(.still)").forEach(sc=>{const v=sc.querySelector("video"),pb=sc.querySelector(".vplay"),mb=sc.querySelector(".mute");
+  const load=()=>{if(!v.src)v.src=v.dataset.src};
+  pb.addEventListener("click",()=>{load();v.play().then(()=>sc.classList.add("playing")).catch(()=>{})});
+  mb.addEventListener("click",()=>{v.muted=!v.muted;mb.textContent=v.muted?"🔇":"🔊";if(!v.muted){document.querySelectorAll("video").forEach(o=>{if(o!==v){o.muted=true}});document.querySelectorAll(".mute").forEach(o=>{if(o!==mb)o.textContent="🔇"})}});
+  new IntersectionObserver(([e])=>{if(e.isIntersecting){load();v.play().then(()=>sc.classList.add("playing")).catch(()=>{})}else{v.pause();sc.classList.remove("playing")}},{threshold:.55}).observe(sc)});
+// hero video pauses when out of view
+(function(){const v=document.querySelector("#heroPhone video");new IntersectionObserver(([e])=>{e.isIntersecting?v.play().catch(()=>{}):v.pause()}).observe(v)})();
+
+/* ================= avatars + gifts ================= */
+(function(){
+  const av=[];[["genc-erkek",7],["genc-kadin",10],["ortayasli-erkek",9],["ortayasli-kadin",8],["yasli-erkek",8],["yasli-kadin",5]].forEach(([p,n])=>{for(let i=1;i<=n;i++)av.push(`${p}-${String(i).padStart(2,"0")}`)});
+  const sh=a=>a.map(x=>[Math.random(),x]).sort((a,b)=>a[0]-b[0]).map(x=>x[1]);
+  const half=Math.ceil(av.length/2),A=sh(av);
+  const mk=list=>{const h=list.map(n=>`<img loading="lazy" src="assets/avatars/${n}.webp" alt="">`).join("");return h+h};
+  document.getElementById("av1").innerHTML=mk(A.slice(0,half));document.getElementById("av2").innerHTML=mk(A.slice(half));
+  const gifts=["tea","simit","turkish_coffee","turkish_delight","ayran","oralet","rose","bouquet","cake","crown","trophy","evil_eye","heart","teddy_bear","lemonade","cologne","potted_flower","diamond_ring","milkshake_strawberry","coffee","fish","slipper","tomato","cactus"];
+  document.getElementById("gifts").innerHTML=gifts.map((g,i)=>`<img loading="lazy" style="--i:${i}" src="assets/gifts/${g}.webp" alt="">`).join("");
+  document.querySelectorAll("#gifts img").forEach(im=>im.addEventListener("click",e=>burst(e.clientX,e.clientY,40)));
+})();
+
+/* ================= gallery + lightbox ================= */
+function buildGallery(){
+  const imgs=["hero-tea","kahvehane-vert",LANG==="en"?"ad-halloween-en":"ad-halloween-tr","sokak-land","beach-friends","kahvehane-square","play-beach","sokak-vert","kahvehane-inside","halloween-square","cinaralti-land","kahvehane-night"];
+  const m=document.getElementById("masonry");m.innerHTML=imgs.map((n,i)=>`<figure class="reveal ${["","d1","d2"][i%3]}"><img loading="lazy" src="assets/img/${n}.jpg" alt=""></figure>`).join("");
+  m.querySelectorAll("figure").forEach(f=>f.addEventListener("click",()=>{const lb=document.getElementById("lightbox");lb.querySelector("img").src=f.querySelector("img").src;lb.classList.add("open")}));
+  observeReveals();
+}
+document.getElementById("lightbox").addEventListener("click",e=>e.currentTarget.classList.remove("open"));
+addEventListener("keydown",e=>{if(e.key==="Escape")document.getElementById("lightbox").classList.remove("open")});
+
+/* ================= final stores + QR ================= */
+document.getElementById("stores2").innerHTML=document.querySelector(".hero .stores").innerHTML;
+try{if(window.QRCode){const o={width:240,height:240,colorDark:"#140a06",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M};new QRCode(document.getElementById("qrA"),Object.assign({text:LINKS.android},o));new QRCode(document.getElementById("qrI"),Object.assign({text:LINKS.ios},o))}else document.getElementById("qrs").style.display="none"}catch(e){document.getElementById("qrs").style.display="none"}
+// QR'lar telefonda gereksiz
+if(matchMedia("(max-width:640px)").matches)document.getElementById("qrs").style.display="none";
+
+/* ================= confetti ================= */
+const cf=document.getElementById("confetti"),cx=cf.getContext("2d");let parts=[],cfRun=false;
+function rsCf(){cf.width=innerWidth*devicePixelRatio;cf.height=innerHeight*devicePixelRatio}rsCf();addEventListener("resize",rsCf);
+function burst(x,y,n){if(matchMedia("(prefers-reduced-motion:reduce)").matches)return;const cols=["#e0343f","#1d6fe0","#f08a12","#f5b642","#fff6dc","#3ddc84"];const d=devicePixelRatio;
+  for(let i=0;i<n;i++){const a=Math.random()*Math.PI*2,s=(Math.random()*9+4)*d;parts.push({x:x*d,y:y*d,vx:Math.cos(a)*s,vy:Math.sin(a)*s-6*d,w:(Math.random()*8+5)*d,h:(Math.random()*12+6)*d,rot:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[i%cols.length],life:1})}
+  if(!cfRun){cfRun=true;requestAnimationFrame(cfLoop)}}
+function cfLoop(){cx.clearRect(0,0,cf.width,cf.height);const d=devicePixelRatio;
+  parts=parts.filter(p=>p.life>0);for(const p of parts){p.vy+=.35*d;p.vx*=.985;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life-=.011;cx.save();cx.globalAlpha=Math.max(0,p.life);cx.translate(p.x,p.y);cx.rotate(p.rot);cx.fillStyle=p.c;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore()}
+  if(parts.length)requestAnimationFrame(cfLoop);else{cfRun=false;cx.clearRect(0,0,cf.width,cf.height)}}
+document.addEventListener("click",e=>{const a=e.target.closest("[data-confetti]");if(a)burst(e.clientX,e.clientY,60)});
+
+/* ================= anchor scroll (lazy resimler sayfayı uzatınca hedefi düzelt) ================= */
+document.addEventListener("click",e=>{const a=e.target.closest('a[href^="#"]');if(!a)return;const id=a.getAttribute("href").slice(1);const el=id&&document.getElementById(id);if(!el)return;
+  e.preventDefault();history.replaceState(null,"","#"+id);
+  const atTarget=()=>{const max=document.documentElement.scrollHeight-innerHeight;return Math.abs(el.getBoundingClientRect().top)<4||scrollY>=max-2};
+  let tries=0;(function go(){el.scrollIntoView({behavior:"smooth"});let last=-1,still=0;
+    const iv=setInterval(()=>{if(scrollY===last)still++;else{still=0;last=scrollY}
+      if(still>=3){clearInterval(iv);if(!atTarget()&&++tries<5)go()}},80)})()});
+/* ================= init ================= */
+document.getElementById("yr").textContent=new Date().getFullYear();
+applyLang(detectLang(),false);
+sizeRack();observeReveals();
+</script>
+</body>
+</html>
