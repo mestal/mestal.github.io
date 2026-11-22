@@ -60,12 +60,20 @@ GPT-2'yi (Generative Pre-trained Transformer 2 / Üretken Önceden Eğitilmiş D
 
 ## Dosya yazma ve teslim kuralları
 
-- **Çalışma klasörü: `D:\repos\GPT2.0BigPicture`** (Google Drive'daki eski klasör artık kullanılmıyor, ona yazma). Erişim yoksa `device_request_folder_access` ile iste.
+- **Çalışma klasörü: `D:\repos\mestal.github.io\GPT2.0BigPicture`.** Eski klasörler (Google Drive'daki ve `D:\repos\GPT2.0BigPicture`) artık kullanılmıyor, onlara yazma. Erişim yoksa `device_request_folder_access` ile iste.
 - **Satır sonları CRLF (Windows).** Dosyalar bu klasörde CRLF. Düzenlerken LF'ye çevirip çalışabilirsin ama **geri yazarken tekrar CRLF yap**, aksi halde git'te tüm dosya değişmiş görünür.
 - Yazmadan önce dosyayı `device_stage_files` ile al ve içeriğin beklediğinle aynı olduğunu doğrula (satır sonlarını normalize ederek karşılaştır).
 - Yeni yazılan dosya container'da birkaç saniye geç okunabiliyor ve `device_commit_files` bazen **eski içeriği yazabiliyor**. Bu yüzden: dosyayı yaz, **~5 saniye bekle**, commit et, sonra `device_list_dir` ile **boyutu yerel dosyayla karşılaştır**. Eşleşmiyorsa tekrar commit et.
 - Cihazdaki kabuk (`device_bash`) bu klasörleri bağlayamayabiliyor. Dosya silme/taşıma gerekirse kullanıcıya bırak.
-- Aynı klasörde `.git` var. **Kullanıcı istemedikçe commit atma.**
+- Bu klasör `mestal.github.io` deposunun **alt klasörü**, `.git` bir üst klasörde. **Kullanıcı istemedikçe commit atma ve push etme.**
+
+## Yayın notu
+
+Klasör `mestal.github.io` deposunun içinde (GitHub Pages sitesi olması muhtemel). Push edilirse sayfalar ve bu dosya herkese açık olabilir. Bu yüzden:
+
+- Sayfalar arası bağlantılar **göreli** kalsın (`GPT2_Egitim.html` gibi), mutlak dosya yolu ya da `file:///` kullanma.
+- Sayfalara ve bu dosyaya kişisel/gizli bilgi, parola, özel yol bilgisi koyma.
+- Her sayfa harici kaynak istemeden çalışmalı (CDN yok), böylece yayınlanınca da açılır.
 
 ## Commit mesajı kuralları
 
