@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPT-2 Eğitim (Training) Sezgisi</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --ink:#1f2937; --muted:#6b7280;
+    --emb:#2f6fb0; --mha:#7b3fa0; --ffn:#e08a1e; --lm:#2a9d9a; --sm:#3c9a4a; --bp:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+  h1{text-align:center;font-size:2rem;margin:8px 0 4px}
+  .sub{text-align:center;color:var(--muted);margin-bottom:18px;font-size:.95rem}
+  .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+  button{font:inherit;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;background:#111827;color:#fff}
+  button.alt{background:#fff;color:#111827;border:1px solid #cbd5e1}
+  button:hover{opacity:.88}
+  button.sel{background:#2f6fb0;color:#fff;border-color:#2f6fb0}
+  .tracker{position:sticky;top:8px;z-index:5;background:#111827;color:#fff;border-radius:12px;padding:10px 16px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;box-shadow:0 4px 14px #0003}
+  .tracker b{font-family:ui-monospace,Consolas,monospace;font-size:1.1rem;color:#fcd34d}
+  .arrow{text-align:center;font-size:1.6rem;color:#94a3b8;margin:6px 0;line-height:1}
+  .card{border-radius:16px;border:3px solid var(--c);background:var(--bg2);padding:16px 18px;cursor:pointer;transition:transform .2s, box-shadow .2s, opacity .2s}
+  .card.active{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 30%,transparent),0 8px 22px #0002}
+  .card.dim{opacity:.5}
+  .card h2{margin:0 0 6px;font-size:1.15rem;color:var(--c);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card h2 small{font-weight:400;color:var(--muted);font-size:.8rem;white-space:nowrap}
+  .card h3{color:var(--c);margin:6px 0}
+  .chip{display:inline-block;font-family:ui-monospace,Consolas,monospace;background:#fff;border:1px solid var(--c);color:var(--c);border-radius:8px;padding:1px 8px;font-size:.9rem;margin:0 2px}
+  .detail{display:none;margin-top:10px;border-top:1px dashed var(--c);padding-top:10px;cursor:auto}
+  .card.open .detail{display:block}
+  .why{background:#fff;border-left:5px solid var(--c);border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.95rem}
+  .why b.l{color:var(--c)}
+  .warn{background:#fffbeb;border-left:5px solid #b45309;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.93rem}
+  .warn b.l{color:#b45309}
+  .good{background:#ecfdf5;border-left:5px solid #16a34a;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.93rem}
+  .fix{background:#fff7ed;border-left:5px solid #ea580c;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:.93rem}
+  hr.d{border:0;border-top:1px dashed var(--c);margin:16px 0}
+  #c1{--c:#6b7280;--bg2:#eef0f3}
+  #c2{--c:var(--emb);--bg2:#e6f0fa}
+  #c3{--c:var(--mha);--bg2:#f1e6f7}
+  #c4{--c:var(--ffn);--bg2:#fdf0dc}
+  #c5{--c:var(--lm);--bg2:#e0f4f3}
+  #c6{--c:var(--sm);--bg2:#e5f5e7}
+  #c7{--c:var(--bp);--bg2:#fbe9e7}
+  .block{border:3px dashed #334155;border-radius:20px;padding:12px;margin:6px 0;background:#ffffff80}
+  .block>.tag{text-align:center;font-weight:700;margin-bottom:8px}
+  .row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0}
+  .tok{background:#fff;border:2px solid #9ca3af;border-radius:8px;padding:6px 12px;font-family:ui-monospace,Consolas,monospace}
+  .grid{display:grid;gap:3px}
+  .cell{background:var(--c);opacity:.75;border-radius:2px;height:12px}
+  .mini{display:inline-block;text-align:center;font-size:.78rem;color:var(--muted)}
+  .heads{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:8px 0}
+  .head{background:var(--c);color:#fff;border-radius:6px;text-align:center;font-size:.72rem;padding:6px 0;cursor:pointer;transition:.2s}
+  .head.sel{outline:3px solid #111;transform:translateY(-3px)}
+  .qkv3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+  .qkv3 div{background:#fff;border-radius:10px;border-top:5px solid var(--c);padding:8px;font-size:.9rem}
+  .bars{display:flex;align-items:flex-end;gap:6px;justify-content:center;height:90px;margin:8px 0}
+  .bar{width:46px;background:#bbdbbf;border-radius:6px 6px 0 0;position:relative;transition:height .6s}
+  .bar.win{background:var(--sm)}
+  .bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:.75rem}
+  .bar i{position:absolute;bottom:-18px;left:-6px;right:-6px;text-align:center;font-size:.72rem;font-style:normal}
+  .expand{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap}
+  .ebar{height:26px;border-radius:6px;color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center;background:var(--c);padding:0 6px}
+  .dim-row{display:grid;grid-template-columns:150px 1fr 44px;gap:8px;align-items:center;margin:4px 0;font-size:.9rem}
+  .dim-track{background:#fff;border-radius:6px;height:16px;overflow:hidden;border:1px solid #cfe0f2}
+  .dim-fill{height:100%;background:var(--emb);width:0;transition:width .5s}
+  .dim-row span.n{font-family:ui-monospace,Consolas,monospace;text-align:right}
+  .pt{width:100%;border-collapse:collapse;font-size:.88rem;margin:8px 0;background:#fff;border-radius:10px;overflow:hidden}
+  .pt th,.pt td{padding:5px 8px;text-align:right;border-bottom:1px solid #e2e8f0;font-family:ui-monospace,Consolas,monospace}
+  .pt th:first-child,.pt td:first-child{text-align:left;font-family:inherit}
+  .pt th{background:#eef2f7;font-family:inherit}
+  .pos{color:#b45309}.tot{font-weight:700;color:#2f6fb0}
+  .pbar{display:inline-block;height:12px;background:var(--mha);border-radius:4px;vertical-align:middle}
+  input[type=range]{width:100%;max-width:420px}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+  .gl td:first-child{font-weight:700;white-space:nowrap}
+  .gl td{text-align:left!important;font-family:inherit!important}
+  .quiz{margin-top:30px;background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #e2e8f0}
+  .quiz button{margin:4px 6px 0 0}
+  .ok{color:#15803d}.no{color:#b91c1c}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:30px}
+  @media(max-width:560px){h1{font-size:1.5rem}.qkv3{grid-template-columns:1fr}.head{font-size:.6rem}
+    .dim-row{grid-template-columns:105px 1fr 38px;font-size:.78rem}}
+
+  .navbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 14px}
+  .navbar a{padding:8px 16px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;text-decoration:none;font-size:.92rem}
+  .navbar a.cur{background:#111827;color:#fff;border-color:#111827;pointer-events:none}
+  a.lnk{color:#2f6fb0;font-weight:600}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:10px 0}
+  .fbox{background:#fff;border:2px solid var(--c);border-radius:10px;padding:6px 10px;font-size:.84rem;text-align:center;max-width:140px}
+  .fbox b{color:var(--c)}
+  .farr{color:#94a3b8;font-size:1.2rem}
+  .ctxrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .ctxrow .tok{text-align:center;font-size:.9rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GPT-2 Eğitim (Training) Sezgisi</h1>
+  <div class="sub">Çıkarım sayfasındaki tüm sayılar (tablolar, Wq, Wk, Wv, FFN...) <b>buradaki süreçle</b> öğrenilir.<br>Önce akışı görmek istersen: <a class="lnk" href="GPT2_Mimari.html">Çıkarım sayfası</a></div>
+  <div class="navbar"><a href="GPT2_Mimari.html">▶ Çıkarım (Inference): model nasıl çalışır?</a><a class="cur" href="GPT2_Egitim.html">🎓 Eğitim (Training): sayılar nasıl öğrenilir?</a></div>
+  <div class="controls">
+    <button id="play">▶ Adım adım oynat</button>
+    <button class="alt" id="prev">◀ Geri</button>
+    <button class="alt" id="next">İleri ▶</button>
+    <button class="alt" id="toggleAll">Hepsini aç / kapat</button>
+  </div>
+  <div class="tracker">
+    <span>Şu anki aşama:</span>
+    <b id="shape">—</b>
+    <span id="shapeNote" style="font-size:.85rem;color:#cbd5e1">Bir kartın başlığına tıkla veya oynat'a bas</span>
+  </div>
+
+  <!-- T1 -->
+  <section class="card open" id="c1" style="--c:#6b7280;--bg2:#eef0f3" data-shape="Döngü" data-note="5 adım, milyonlarca tekrar">
+    <h2>1. Büyük resim: eğitim döngüsü <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="flow">
+      <div class="fbox"><b>① Veri</b><br>metin parçaları (batch / küme)</div><span class="farr">→</span>
+      <div class="fbox"><b>② İleri yayılım</b><br>çıkarım sayfasındaki akış</div><span class="farr">→</span>
+      <div class="fbox"><b>③ Loss (Kayıp)</b><br>tahmin ne kadar yanlış?</div><span class="farr">→</span>
+      <div class="fbox"><b>④ Geri yayılım</b><br>her ağırlık için türev</div><span class="farr">→</span>
+      <div class="fbox"><b>⑤ Güncelleme</b><br>ağırlıkları azıcık kaydır</div><span class="farr">↺ tekrar</span>
+    </div>
+    <div class="detail">
+      <div class="why"><b class="l">Sezgi: sisli dağda yürümek.</b> Dağın en alçak noktasına (en az hata) inmek istiyorsun ama sis yüzünden hiçbir şey göremiyorsun. Tek yapabildiğin, ayağının altındaki eğime bakıp (türev) <b>aşağı doğru küçük bir adım</b> atmak. Sonra tekrar bakarsın, tekrar adım atarsın. Model tam bunu yapar. "Konum" = ağırlıkların hepsi, "yükseklik" = loss.</div>
+      <div class="why"><b class="l">Başka bir benzetme: dart atışı.</b> Atış = ileri yayılım. Hedeften sapma = loss. "Elimi hangi yöne, ne kadar kaydırmalıyım?" = geri yayılım. Elini ayarlamak = güncelleme. Sonra tekrar at.</div>
+      <b>Çıkarım ile eğitimin farkı:</b>
+      <table class="pt" style="margin-top:6px">
+        <tr><th></th><th>Çıkarım (Inference)</th><th>Eğitim (Training)</th></tr>
+        <tr><td>Ağırlıklar</td><td>sabit</td><td>her adımda azıcık değişir</td></tr>
+        <tr><td>Hesap</td><td>sadece ileri yayılım</td><td>ileri + loss + geri yayılım + güncelleme</td></tr>
+        <tr><td>Doğru cevap</td><td>bilinmez, model üretir</td><td>bilinir (metnin devamı)</td></tr>
+        <tr><td>Çıktı</td><td>sonraki token</td><td>iyileşmiş ağırlıklar</td></tr>
+        <tr><td>Dropout (Rastgele sönme)</td><td>kapalı</td><td>genelde açık (aşırı ezberlemeyi azaltır)</td></tr>
+      </table>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T2 -->
+  <section class="card open" id="c2" style="--c:#2f6fb0;--bg2:#e6f0fa" data-shape="Loss = −ln(p)" data-note="Tek bir hata sayısı">
+    <h2>2. Loss (Kayıp): hata tek bir sayıya nasıl dönüşüyor? <small>başlığa tıkla</small></h2>
+    <div>Model doğru kelimeye ne kadar olasılık verdiyse, hata o kadar küçük. Formül: <span class="chip">Loss = −ln(p_doğru)</span> (Cross-Entropy / Çapraz Entropi)</div>
+    <div class="detail">
+      <div class="row">Doğru kelime "yedim". Modelin ona verdiği olasılık: <input type="range" id="lp" min="1" max="99" step="1" value="62"> <span class="mono" id="lpv"></span></div>
+      <div id="lossOut"></div>
+      <div class="why"><b class="l">Neden −ln?</b> Olasılık 1'e yaklaştıkça loss 0'a iner (tam doğru). Olasılık 0'a yaklaştıkça loss hızla büyür. Yani <b>"emin ama yanlış" cezası çok ağır</b>. Kaydırıcıyı %1'e çekip gör.</div>
+      <hr class="d">
+      <h3>Veriye etiket gerekmiyor</h3>
+      <div>Metnin kendisi hem soru hem cevap. "Sabah armut yedim." cümlesinden tek seferde şu örnekler çıkar:</div>
+      <table class="pt" style="margin-top:6px">
+        <tr><th>Model ne görür</th><th>Doğru cevap</th></tr>
+        <tr><td>Sabah</td><td>armut</td></tr>
+        <tr><td>Sabah armut</td><td>yedim</td></tr>
+        <tr><td>Sabah armut yedim</td><td>.</td></tr>
+      </table>
+      <div>Üç tahminin loss'u ortalanır. Hepsi <b>tek ileri geçişte paralel</b> hesaplanır. Model her konumda sadece kendinden önceki token'ları görebildiği için (causal mask / nedensel maske) cevabı önceden göremez. Bu yöntemin adı self-supervised (kendi kendine denetimli) öğrenme.</div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T3 -->
+  <section class="card open" id="c3" style="--c:#c0392b;--bg2:#fbe9e7" data-shape="∂Loss/∂w" data-note="Hata sondan başa doğru dağıtılıyor">
+    <h2>3. Backpropagation (Geri Yayılım) <small>başlığa tıkla</small></h2>
+    <div>Her ağırlık için tek bir soruyu cevaplar: <b>"Bu sayıyı çok az artırırsam loss ne kadar ve hangi yönde değişir?"</b> Bu cevaba türev (gradient / eğim) denir.</div>
+    <div class="detail">
+      <div class="why"><b class="l">Zincir kuralı = dişli çarklar.</b> Bir dişliyi biraz çevirirsen sonraki dişli kendi oranıyla, onun ardındaki de kendi oranıyla döner. Sondaki dönüş, aradaki tüm oranların <b>çarpımıdır</b>. Ağdaki her katman da değişimi kendi oranıyla büyütür ya da küçültür. Sondan başa gidip bu oranları çarparak "ilk ağırlık oynarsa loss ne kadar oynar" hesaplanır.</div>
+      <ol>
+        <li><b>Sondan başlanır:</b> Loss'un çıktıya göre türevi hesaplanır.</li>
+        <li><b>Geriye taşınır:</b> Her katmanın yerel türevi çarpılarak bir önceki katmana geçilir (zincir kuralı / chain rule). Ara sonuçlar yeniden kullanıldığı için tüm ağırlıkların türevi tek geri geçişte çıkar.</li>
+        <li><b>Her ağırlık kendi türevini alır:</b> embedding tabloları, konum tablosu, Wq/Wk/Wv, FFN matrisleri, hepsi.</li>
+      </ol>
+      <div class="good"><b>✅ "Sondan başa doğru türev alınır, ağırlıklar güncellenir"</b> cümlesi büyük ölçüde doğru.</div>
+      <div class="fix"><b>🔧 İnce ayar 1:</b> Türevi alınan şey "her işlemin kendi türevi" değil, <b>loss'un o ağırlığa göre türevidir</b>. Yerel türevler zincirle çarpılıp oraya taşınır.</div>
+      <div class="fix"><b>🔧 İnce ayar 2:</b> Backpropagation <b>sadece türevleri hesaplar</b>. Ağırlıkları güncelleyen ayrı bir adımdır (bkz. 4. kart: optimizer). Pratikte önce tüm türevler hesaplanır, sonra güncelleme yapılır.</div>
+      <div class="fix"><b>🔧 İnce ayar 3:</b> Tek örnekle değil, bir batch (küme) üzerinden ortalanan loss'un türeviyle çalışılır. Bu işlem milyonlarca kez tekrarlanır.</div>
+
+      <hr class="d">
+      <h3>🧪 Minik örnek: 2 ağırlıklı ağ, zincir kuralını izle</h3>
+      <div>Ağ: <span class="chip">a = w1 · x</span> → <span class="chip">y = w2 · a</span>. Girdi x = 2, hedef t = 3. Loss = (y − t)². Başlangıç w1 = 0,5, w2 = 1,0. LR = 0,05.</div>
+      <div class="row">
+        <button id="bpStep">1 adım at</button>
+        <button class="alt" id="bpTen">10 adım at</button>
+        <button class="alt" id="bpReset">Sıfırla</button>
+      </div>
+      <div id="bpOut"></div>
+      <div class="warn"><b class="l">⚠️</b> Burada 2 ağırlık var. GPT-2 small'da yaklaşık 124 milyon var. Mantık aynı.</div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T4 -->
+  <section class="card open" id="c4" style="--c:#e08a1e;--bg2:#fdf0dc" data-shape="w − LR × türev" data-note="Adım büyüklüğü önemli">
+    <h2>4. Güncelleme: Optimizer ve LR (Learning Rate / Öğrenme Hızı) <small>başlığa tıkla</small></h2>
+    <div>Türev yönü söyler, <b>LR adımın büyüklüğünü</b> söyler: <span class="chip">w_yeni = w_eski − LR × türev</span></div>
+    <div class="detail">
+      <div class="why"><b class="l">Sisli dağ benzetmesi:</b> LR çok küçükse adımlar minik, inmek yıllar sürer. LR çok büyükse vadinin karşı yamacına sıçrarsın, hatta daha yukarı çıkarsın. Aşağıda basit bir tek ağırlıklı örnek var (loss = (w − 3)², en iyi nokta w = 3, başlangıç w = 0).</div>
+      <div class="row">LR: <input type="range" id="lrs" min="0.02" max="1.2" step="0.02" value="0.1"> <span class="mono" id="lrv"></span></div>
+      <svg id="lrsvg" viewBox="0 0 400 210" style="width:100%;max-width:520px;display:block;margin:0 auto;background:#fff;border-radius:10px"></svg>
+      <div id="lrtxt" style="text-align:center;margin-top:6px"></div>
+      <hr class="d">
+      <ul>
+        <li><b>Optimizer (Optimize edici):</b> Güncelleme kuralını yürüten parça. En yalın hali SGD (Stochastic Gradient Descent / Rastgele Eğim İnişi): yukarıdaki formül.</li>
+        <li><b>Adam (Adaptive Moment Estimation / Uyarlanabilir Moment Tahmini):</b> Her ağırlık için adımı, o ağırlığın geçmiş türevlerine göre ayrı ayrı ayarlar. Transformer modellerinde Adam ailesi (AdamW) yaygın kullanılır.</li>
+        <li>Pratikte LR sabit tutulmaz: genelde başta küçük başlar, yükselir, sonra yavaşça azalır.</li>
+      </ul>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T5 -->
+  <section class="card open" id="sayilar" style="--c:#7b3fa0;--bg2:#f1e6f7" data-shape="Rastgele → anlamlı" data-note="Anlam eğitimde ortaya çıkıyor">
+    <h2>5. Sayılar nereden geliyor? (768 boyut, Wq/Wk/Wv, konum) <small>başlığa tıkla</small></h2>
+    <div>Başlangıçta tüm tablolar ve matrisler <b>rastgele küçük sayılardır</b>, hiçbir anlam taşımazlar. Anlam eğitimle kendiliğinden ortaya çıkar.</div>
+    <div class="detail">
+      <b>Kelime vektörleri nasıl yakınlaşıyor?</b> Kaydırıcıyı çek: eğitim ilerledikçe benzer bağlamlarda geçen kelimeler (armut, elma) birbirine yaklaşır.
+      <div class="row">Eğitim ilerlemesi: <input type="range" id="es" min="0" max="100" value="0"> <span class="mono" id="esv"></span></div>
+      <svg id="esvg" viewBox="0 0 400 220" style="width:100%;max-width:520px;display:block;margin:0 auto;background:#fff;border-radius:10px"></svg>
+      <div class="warn"><b class="l">⚠️ İllüstrasyon:</b> Gerçekte 768 boyut var, burada 2 çizdik. Konumlar uydurma. Doğru olan ilke: "armut" satırı, armutun geçtiği yerlerde hatayı azaltacak yönde kayar. Benzer yerlerde geçen kelimeler benzer yönlere kaydığı için yakınlaşır.</div>
+
+      <hr class="d">
+      <h3>Her sayı nasıl öğreniliyor?</h3>
+      <ul>
+        <li><b>Kelime tablosu:</b> Eğitimde sadece o adımda <b>kullanılan token'ların satırları</b> türev alır ve kayar. Geri kalan 50 bin satır o adımda değişmez.</li>
+        <li><b>Konum tablosu:</b> Aynı mantık. "Sıra bilgisini kullanmak hatayı azaltıyor" ise o yönde pekişir.</li>
+        <li><b>Wq, Wk, Wv:</b> "Hangi kelime hangisine bakmalı?" sorusunun cevabı da böyle öğrenilir. Doğru tahmini kolaylaştıran eşleşmeler pekişir.</li>
+        <li><b>Weight tying (Ağırlık paylaşımı):</b> GPT-2'de çıkış matrisi (LM Head), kelime tablosunun ters çevrilmiş halidir. Aynı sayılara türev iki yönden gelir: girişten ve çıkıştan.</li>
+      </ul>
+      <div class="why"><b class="l">"768 boyut = 768 konu" demiştik, gerçek durum:</b> Hangi boyutun neyi temsil edeceğine kimse karar vermez, eğitim karar verir. Çoğu zaman bir kavram tek boyutta durmaz, birçok boyuta yayılır.</div>
+
+      <hr class="d">
+      <h3>❓ Toplanan "kelime + konum" karışımını model nasıl çözüyor?</h3>
+      <div class="why"><b class="l">Kısa cevap:</b> Aslında hiçbir şeyi ayırmıyor. Ayırmasına gerek de yok. Sonraki katmanlar, karışımdan <b>ihtiyaç duydukları kısmı okumayı</b> öğreniyor.</div>
+      <ol>
+        <li><b>Toplam:</b> <span class="chip">x = kelime + konum</span></li>
+        <li><b>Sonraki ilk iş çarpma.</b> Attention'da x, ağırlık matrisleriyle çarpılır: <span class="chip">Q = x · Wq</span>. Çarpma toplamı dağıtır:
+          <div style="text-align:center;margin:6px 0"><span class="chip">x · Wq = (kelime · Wq) + (konum · Wq)</span></div>
+          Yani Wq, kelime kısmına ve konum kısmına <b>ayrı ayrı</b> etki eder. Wq'nun içindeki sayılar hangi bilginin ne kadar ve nasıl okunacağını belirler.</li>
+        <li><b>768 boyutta yer bol.</b> Yüksek boyutlu uzayda iki farklı bilgi birbirini ezmeden farklı yönlerde durabilir (rastgele iki vektör bile neredeyse birbirine diktir). Radyo benzetmesi: aynı antene iki istasyon aynı anda çalar, alıcının düğmesini çevirince birini seçersin. <b>Wq, Wk, Wv o düğmelerdir.</b></li>
+        <li><b>Düğmeleri kim çeviriyor?</b> Backpropagation (3. kart) ve güncelleme (4. kart). Konum bilgisini kullanmak loss'u azaltıyorsa, türev hem Wq/Wk/Wv içindeki ilgili sayıları hem de konum tablosunu o yönde kaydırır. Kimse "konumu şöyle oku" diye yazmaz, hatayı azaltan şey azar azar pekişir.</li>
+        <li><b>Örnek:</b> "Hep bir önceki kelimeye bak" gibi davranışlar böyle ortaya çıkabilir: Q'nun ve K'nin konum kısımları, sıra n ile n−1 birbirine yüksek puan verecek şekilde ayarlanır. Benzer davranan başlar GPT-2 üzerine yapılan araştırmalarda bulunmuştur.</li>
+      </ol>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T6 -->
+  <section class="card open" id="aktivasyon" style="--c:#e08a1e;--bg2:#fdf0dc" data-shape="Türev: GELU vs ReLU" data-note="Zincir kopmamalı">
+    <h2>6. Aktivasyonun türevi: GELU neden, ReLU neden değil? <small>başlığa tıkla</small></h2>
+    <div>Geri yayılımda zincir, aktivasyonun türevinden de geçer. Türev 0 olursa o noktada zincir <b>sönüp gider</b>.</div>
+    <div class="detail">
+      <div class="row">x değeri: <input type="range" id="gx" min="-4" max="4" step="0.05" value="1"> <span class="mono" id="gxv"></span></div>
+      <svg id="gsvg" viewBox="0 0 400 220" style="width:100%;max-width:520px;display:block;margin:0 auto;background:#fff;border-radius:10px"></svg>
+      <table class="pt" style="max-width:520px;margin:8px auto">
+        <tr><th>Fonksiyon</th><th>Çıktı</th><th>Türev (eğim)</th></tr>
+        <tr><td style="color:#6b7280">ReLU (Rectified Linear Unit / Doğrultulmuş Doğrusal Birim)</td><td id="rOut"></td><td id="rDer"></td></tr>
+        <tr><td style="color:#e08a1e">GELU (Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi)</td><td id="gOut"></td><td id="gDer"></td></tr>
+      </table>
+      <div class="fix"><b>🔧 GELU hep pozitif değildir.</b> Hep sıfır ya da pozitif olan <b>ReLU</b>'dur. GELU negatif girişte küçük negatif değerler verebilir (en düşüğü yaklaşık −0,17, x ≈ −0,75'te).</div>
+      <div class="why"><b class="l">Neden ReLU değil de GELU?</b>
+        <ul style="margin:6px 0">
+          <li><b>Türevsiz nokta:</b> ReLU x = 0'da kırık olduğu için matematiksel olarak türevsizdir (soldan eğim 0, sağdan 1). Pratikte yazılım orada 0 ya da 1 seçip geçer. Tam 0'a nadiren denk geldiği için tek başına büyük sorun olmaz.</li>
+          <li><b>Daha büyük sorun:</b> ReLU'da <b>x &lt; 0 olan her yerde türev tam 0</b>'dır. Türev 0 ise o nörona hiç öğrenme sinyali gitmez, nöron takılıp kalabilir ("ölü nöron" / dying ReLU).</li>
+          <li><b>GELU:</b> Her noktada türevlenebilir, eğrisi pürüzsüzdür, negatif tarafta da küçük de olsa sıfır olmayan bir eğim bırakır. Transformer modellerinde pratikte daha iyi eğitildiği için (BERT ve GPT ailesi) tercih edildi. Bu bir teorem değil, <b>deneylerle görülen bir üstünlük</b>.</li>
+          <li>GPT-2, GELU'nun tanh ile yaklaşık hesaplanan sürümünü kullanır. Grafik de onu çiziyor.</li>
+        </ul></div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- T7 -->
+  <section class="card open" id="c7" style="--c:#2a9d9a;--bg2:#e0f4f3" data-shape="Pratik notlar" data-note="Büyük ölçekte eğitim">
+    <h2>7. Pratik notlar: batch, overfitting, ölçek <small>başlığa tıkla</small></h2>
+    <div>Aynı döngü, çok büyük bir metin yığınında, çok sayıda tekrarla çalışır.</div>
+    <div class="detail">
+      <ul>
+        <li><b>Batch (Küme / Mini-batch):</b> Her adımda tek cümle değil, birçok metin parçası aynı anda işlenir. Türevler ortalanır. Daha kararlı ve GPU'da (ekran kartı) daha hızlı.</li>
+        <li><b>Veri:</b> GPT-2, internetten toplanan WebText adlı büyük bir metin derlemesiyle eğitildi (yaklaşık 40 GB düzeyinde metin).</li>
+        <li><b>Overfitting (Aşırı uyum / ezberleme):</b> Model eğitim verisini ezberlerse yeni metinde kötü çalışır. Dropout gibi yöntemler ve çok veri bunu azaltır. Eğitimde ayrı bir doğrulama (validation) verisinde loss izlenir.</li>
+        <li><b>Boyut:</b> GPT-2 small yaklaşık 124 milyon ağırlığa sahiptir. Hepsi aynı döngüyle öğrenilir.</li>
+        <li><b>Eğitim bitince:</b> Ağırlıklar dondurulur ve <a class="lnk" href="GPT2_Mimari.html">çıkarım sayfasındaki</a> akış, bu sabit sayılarla çalışır.</li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="quiz">
+    <b>📖 Kısaltmalar sözlüğü</b>
+    <table class="pt gl" style="margin-top:8px">
+      <tr><td>Loss</td><td>Loss / Kayıp (hata miktarı)</td></tr>
+      <tr><td>Cross-Entropy</td><td>Cross-Entropy / Çapraz Entropi (loss türü)</td></tr>
+      <tr><td>Backpropagation</td><td>Backpropagation / Geri Yayılım</td></tr>
+      <tr><td>Gradient</td><td>Gradient / Eğim, türev (loss'un ağırlığa göre değişimi)</td></tr>
+      <tr><td>LR</td><td>Learning Rate / Öğrenme Hızı</td></tr>
+      <tr><td>SGD</td><td>Stochastic Gradient Descent / Rastgele Eğim İnişi</td></tr>
+      <tr><td>Adam</td><td>Adaptive Moment Estimation / Uyarlanabilir Moment Tahmini (optimizer)</td></tr>
+      <tr><td>Batch</td><td>Batch / Küme (aynı anda işlenen örnekler)</td></tr>
+      <tr><td>Overfitting</td><td>Overfitting / Aşırı uyum, ezberleme</td></tr>
+      <tr><td>Dropout</td><td>Dropout / Rastgele sönme (eğitimde bazı sayıları geçici sıfırlama)</td></tr>
+      <tr><td>Causal mask</td><td>Causal Mask / Nedensel Maske (geleceğe bakmayı engeller)</td></tr>
+      <tr><td>Weight tying</td><td>Weight Tying / Ağırlık paylaşımı</td></tr>
+      <tr><td>Wq, Wk, Wv</td><td>Weight / Ağırlık matrisleri (Q, K, V'yi üreten matrisler)</td></tr>
+      <tr><td>GELU</td><td>Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi</td></tr>
+      <tr><td>ReLU</td><td>Rectified Linear Unit / Doğrultulmuş Doğrusal Birim</td></tr>
+    </table>
+  </div>
+
+  <div class="quiz">
+    <b>🧠 Mini test:</b> Backpropagation tam olarak neyi hesaplar?
+    <div id="quizBtns"></div>
+    <div id="quizRes" style="margin-top:8px"></div>
+  </div>
+  <footer>Çıkarım kısmı için <a class="lnk" href="GPT2_Mimari.html">GPT2_Mimari.html</a></footer>
+</div>
+<script>
+
+const cards=[...document.querySelectorAll('.card')];
+let idx=-1, timer=null;
+// ---------- GELU / ReLU ----------
+const gelu=x=>0.5*x*(1+Math.tanh(Math.sqrt(2/Math.PI)*(x+0.044715*x**3)));
+const relu=x=>Math.max(0,x);
+const gder=x=>(gelu(x+1e-4)-gelu(x-1e-4))/2e-4;
+const PX=x=>200+x*45, PY=y=>170-y*40;
+function renderG(){
+  const x=parseFloat(document.getElementById('gx').value);
+  document.getElementById('gxv').textContent='x = '+x.toFixed(2);
+  let s='<line x1="0" y1="'+PY(0)+'" x2="400" y2="'+PY(0)+'" stroke="#999" stroke-width=".7"/><line x1="'+PX(0)+'" y1="0" x2="'+PX(0)+'" y2="220" stroke="#999" stroke-width=".7"/>';
+  for(let k=-4;k<=4;k++){s+='<text x="'+PX(k)+'" y="'+(PY(0)+12)+'" font-size="8" fill="#888" text-anchor="middle">'+k+'</text>'}
+  let r='',g='';
+  for(let v=-4;v<=4.001;v+=.1){r+=PX(v).toFixed(1)+','+PY(relu(v)).toFixed(1)+' ';g+=PX(v).toFixed(1)+','+PY(gelu(v)).toFixed(1)+' '}
+  s+='<polyline points="'+r+'" fill="none" stroke="#9ca3af" stroke-width="3"/>';
+  s+='<polyline points="'+g+'" fill="none" stroke="#e08a1e" stroke-width="2.5"/>';
+  s+='<circle cx="'+PX(x)+'" cy="'+PY(relu(x))+'" r="5" fill="#6b7280"/><circle cx="'+PX(x)+'" cy="'+PY(gelu(x))+'" r="5" fill="#e08a1e" stroke="#fff"/>';
+  s+='<text x="8" y="14" font-size="10" fill="#6b7280">gri: ReLU</text><text x="8" y="28" font-size="10" fill="#e08a1e">turuncu: GELU</text>';
+  document.getElementById('gsvg').innerHTML=s;
+  document.getElementById('rOut').textContent=relu(x).toFixed(3);
+  document.getElementById('rDer').textContent=Math.abs(x)<1e-9?'tanımsız (kırık nokta)':(x>0?'1':'0 (öğrenme sinyali yok)');
+  document.getElementById('gOut').textContent=gelu(x).toFixed(3);
+  document.getElementById('gDer').textContent=gder(x).toFixed(3);
+}
+document.getElementById('gx').oninput=renderG;
+renderG();
+
+// ---------- Backprop mini örnek ----------
+const BP0={w1:0.5,w2:1.0,x:2,t:3,lr:0.05};
+let bp,bpHist;
+function bpReset(){bp={...BP0};bpHist=[];bpRender(null)}
+function bpCompute(){
+  const a=bp.w1*bp.x,y=bp.w2*a,L=(y-bp.t)**2;
+  const dy=2*(y-bp.t),g2=dy*a,da=dy*bp.w2,g1=da*bp.x;
+  return {a,y,L,dy,g2,da,g1};
+}
+function bpStep(){
+  const c=bpCompute();bpHist.push(c.L);
+  bp.w2-=bp.lr*c.g2;bp.w1-=bp.lr*c.g1;
+  bpRender(c);
+}
+function bpRender(last){
+  const c=bpCompute();
+  let h='<table class="pt"><tr><th>Adım</th><th>w1</th><th>w2</th><th>y (tahmin)</th><th>Loss</th></tr>';
+  h+='<tr><td>şimdi</td><td>'+bp.w1.toFixed(3)+'</td><td>'+bp.w2.toFixed(3)+'</td><td>'+c.y.toFixed(3)+'</td><td class="tot">'+c.L.toFixed(4)+'</td></tr></table>';
+  h+='<div class="why"><b class="l">İleri:</b> a = '+bp.w1.toFixed(3)+' × 2 = '+c.a.toFixed(3)+' → y = '+bp.w2.toFixed(3)+' × '+c.a.toFixed(3)+' = '+c.y.toFixed(3)+'<br>';
+  h+='<b class="l">Geri (sondan başa):</b><br>'+
+     '① dLoss/dy = 2(y − t) = '+c.dy.toFixed(3)+'<br>'+
+     '② dLoss/dw2 = ① × a = '+c.g2.toFixed(3)+'<br>'+
+     '③ dLoss/da = ① × w2 = '+c.da.toFixed(3)+'<br>'+
+     '④ dLoss/dw1 = ③ × x = '+c.g1.toFixed(3)+' <span style="color:#6b7280">(zincir: ① × w2 × x)</span><br>'+
+     '<b class="l">Güncelle:</b> w = w − 0,05 × türev. Türev negatif → ağırlık artar → tahmin hedefe (3) yaklaşır.</div>';
+  if(bpHist.length) h+='<div style="font-size:.85rem;color:#6b7280">Loss geçmişi: '+bpHist.map(v=>v.toFixed(2)).join(' → ')+'</div>';
+  document.getElementById('bpOut').innerHTML=h;
+}
+document.getElementById('bpStep').onclick=e=>{e.stopPropagation();bpStep()};
+document.getElementById('bpTen').onclick=e=>{e.stopPropagation();for(let i=0;i<10;i++)bpStep()};
+document.getElementById('bpReset').onclick=e=>{e.stopPropagation();bpReset()};
+bpReset();
+
+
+// ---------- Loss ----------
+function renderLoss(){
+  const p=parseInt(document.getElementById('lp').value)/100, L=-Math.log(p);
+  document.getElementById('lpv').textContent='p = %'+(p*100).toFixed(0);
+  const w=Math.min(100,L/4.6*100);
+  document.getElementById('lossOut').innerHTML='<div class="why"><b class="l">Loss = −ln('+p.toFixed(2)+') = '+L.toFixed(3)+'</b><div style="background:#fff;border:1px solid #fca5a5;border-radius:6px;height:16px;margin-top:6px"><div style="width:'+w+'%;height:100%;background:#c0392b;border-radius:6px"></div></div><span style="font-size:.85rem;color:#6b7280">'+(p>0.7?'iyi tahmin, küçük ceza':p>0.2?'orta, orta ceza':'kötü tahmin, ağır ceza')+'</span></div>';
+}
+document.getElementById('lp').oninput=renderLoss;renderLoss();
+
+// ---------- LR ----------
+function renderLR(){
+  const lr=parseFloat(document.getElementById('lrs').value);
+  document.getElementById('lrv').textContent='LR = '+lr.toFixed(2);
+  const X=w=>20+(w+1)*45, Y=L=>200-L*11;
+  let s='<line x1="0" y1="200" x2="400" y2="200" stroke="#999" stroke-width=".7"/>';
+  let curve='';for(let w=-1;w<=7.001;w+=.1){curve+=X(w).toFixed(1)+','+Y((w-3)**2).toFixed(1)+' '}
+  s+='<polyline points="'+curve+'" fill="none" stroke="#cbd5e1" stroke-width="3"/>';
+  s+='<text x="'+X(3)+'" y="214" font-size="9" fill="#16a34a" text-anchor="middle">en iyi w = 3</text>';
+  let w=0,pts=[],path='';
+  for(let k=0;k<=10;k++){const L=(w-3)**2;pts.push([w,L]);w=w-lr*2*(w-3);}
+  const inb=pts.filter(([w,L])=>w>=-1&&w<=7&&L<=17);
+  path=inb.map(([w,L])=>X(w).toFixed(1)+','+Y(L).toFixed(1)).join(' ');
+  s+='<polyline points="'+path+'" fill="none" stroke="#e08a1e" stroke-width="1.5" stroke-dasharray="3 2"/>';
+  inb.forEach(([w,L],i)=>{s+='<circle cx="'+X(w)+'" cy="'+Y(L)+'" r="'+(i==0?6:3.5)+'" fill="'+(i==0?'#2f6fb0':'#e08a1e')+'"/>'});
+  document.getElementById('lrsvg').innerHTML=s;
+  const last=pts[pts.length-1][0];
+  let t;
+  if(lr<0.5) t='Düzgün iner. 10 adım sonra w = '+last.toFixed(2)+(lr<0.1?' (hâlâ yolun başında, çok yavaş)':'');
+  else if(lr<1) t='İleri-geri zıplayarak iner. 10 adım sonra w = '+last.toFixed(2);
+  else if(lr<1.0001) t='LR = 1: hedefe hiç oturmaz, 0 ile 6 arasında gidip gelir.';
+  else t='Patlar (ıraksar): her adım hedeften daha da uzaklaşır. w = '+last.toExponential(1);
+  document.getElementById('lrtxt').innerHTML='<b>'+t+'</b>';
+}
+document.getElementById('lrs').oninput=renderLR;renderLR();
+
+// ---------- Embedding evrimi ----------
+const EM=[['armut',[-2,2.4],[2.6,1.8],'#16a34a'],['elma',[2.4,-2.2],[3.3,1.2],'#16a34a'],['Sabah',[1.8,2.6],[-3.2,-1.6],'#2f6fb0'],['akşam',[-1.4,-2.6],[-3.6,-2.2],'#2f6fb0']];
+function renderEm(){
+  const s=parseInt(document.getElementById('es').value)/100;
+  document.getElementById('esv').textContent='%'+Math.round(s*100);
+  const X=x=>200+x*42,Y=y=>110-y*30;
+  let h='<line x1="0" y1="110" x2="400" y2="110" stroke="#ddd"/><line x1="200" y1="0" x2="200" y2="220" stroke="#ddd"/>';
+  EM.forEach(([n,a,b,c])=>{const x=a[0]*(1-s)+b[0]*s,y=a[1]*(1-s)+b[1]*s;
+    h+='<circle cx="'+X(x)+'" cy="'+Y(y)+'" r="8" fill="'+c+'"/><text x="'+X(x)+'" y="'+(Y(y)-12)+'" font-size="11" text-anchor="middle" fill="#334155">'+n+'</text>'});
+  h+='<text x="8" y="14" font-size="9" fill="#16a34a">yeşil: meyve</text><text x="8" y="26" font-size="9" fill="#2f6fb0">mavi: zaman</text>';
+  document.getElementById('esvg').innerHTML=h;
+}
+document.getElementById('es').oninput=renderEm;renderEm();
+
+// ---------- test ----------
+const opts=[['Ağırlıkları günceller',false],['Loss\'un her ağırlığa göre türevini hesaplar',true],['Bir sonraki kelimeyi üretir',false],['Metni token\'lara böler',false]];
+const qb=document.getElementById('quizBtns');
+opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='alt';b.textContent=t;
+  b.onclick=()=>{document.getElementById('quizRes').innerHTML=ok?'<span class="ok">✅ Doğru! Güncellemeyi optimizer yapar.</span>':'<span class="no">❌ Tekrar dene. İpucu: 3. ve 4. kartın farkı.</span>'};
+  qb.appendChild(b)});
+// ---------- kart gezintisi ----------
+function setActive(i){
+  idx=i;
+  cards.forEach((c,k)=>{c.classList.toggle('active',k===i);c.classList.toggle('dim',i>=0&&k!==i)});
+  if(i>=0){
+    const c=cards[i];
+    document.getElementById('shape').textContent=c.dataset.shape;
+    document.getElementById('shapeNote').textContent=c.dataset.note;
+    c.classList.add('open');
+    c.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+cards.forEach((c,i)=>c.addEventListener('click',e=>{
+  if(e.target.closest('.detail')||e.target.closest('button')||e.target.closest('input')||e.target.closest('a'))return;
+  if(c.classList.contains('open')&&idx===i){c.classList.remove('open');setActive(-1);return}
+  setActive(i)}));
+document.getElementById('next').onclick=()=>setActive(Math.min(idx+1,cards.length-1));
+document.getElementById('prev').onclick=()=>setActive(Math.max(idx-1,0));
+document.getElementById('toggleAll').onclick=()=>{
+  const any=cards.some(c=>c.classList.contains('open'));
+  cards.forEach(c=>c.classList.toggle('open',!any));
+  if(any)setActive(-1);
+};
+const playBtn=document.getElementById('play');
+playBtn.onclick=()=>{
+  if(timer){clearInterval(timer);timer=null;playBtn.textContent='▶ Adım adım oynat';return}
+  setActive(0);playBtn.textContent='⏸ Durdur';
+  timer=setInterval(()=>{
+    if(idx>=cards.length-1){clearInterval(timer);timer=null;playBtn.textContent='▶ Tekrar oynat';return}
+    setActive(idx+1);
+  },3500);
+};
+
+
+</script>
+</body>
+</html>

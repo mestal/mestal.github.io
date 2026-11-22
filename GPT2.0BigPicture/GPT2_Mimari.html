@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GPT-2 Çıkarım (Inference) Akışı</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --ink:#1f2937; --muted:#6b7280;
+    --emb:#2f6fb0; --mha:#7b3fa0; --ffn:#e08a1e; --lm:#2a9d9a; --sm:#3c9a4a; --bp:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);line-height:1.5}
+  .wrap{max-width:900px;margin:0 auto;padding:24px 16px 80px}
+  h1{text-align:center;font-size:2rem;margin:8px 0 4px}
+  .sub{text-align:center;color:var(--muted);margin-bottom:18px;font-size:.95rem}
+  .controls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:12px}
+  button{font:inherit;border:0;border-radius:10px;padding:9px 16px;cursor:pointer;background:#111827;color:#fff}
+  button.alt{background:#fff;color:#111827;border:1px solid #cbd5e1}
+  button:hover{opacity:.88}
+  button.sel{background:#2f6fb0;color:#fff;border-color:#2f6fb0}
+  .tracker{position:sticky;top:8px;z-index:5;background:#111827;color:#fff;border-radius:12px;padding:10px 16px;
+    display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px;box-shadow:0 4px 14px #0003}
+  .tracker b{font-family:ui-monospace,Consolas,monospace;font-size:1.1rem;color:#fcd34d}
+  .arrow{text-align:center;font-size:1.6rem;color:#94a3b8;margin:6px 0;line-height:1}
+  .card{border-radius:16px;border:3px solid var(--c);background:var(--bg2);padding:16px 18px;cursor:pointer;transition:transform .2s, box-shadow .2s, opacity .2s}
+  .card.active{box-shadow:0 0 0 5px color-mix(in srgb,var(--c) 30%,transparent),0 8px 22px #0002}
+  .card.dim{opacity:.5}
+  .card h2{margin:0 0 6px;font-size:1.15rem;color:var(--c);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card h2 small{font-weight:400;color:var(--muted);font-size:.8rem;white-space:nowrap}
+  .card h3{color:var(--c);margin:6px 0}
+  .chip{display:inline-block;font-family:ui-monospace,Consolas,monospace;background:#fff;border:1px solid var(--c);color:var(--c);border-radius:8px;padding:1px 8px;font-size:.9rem;margin:0 2px}
+  .detail{display:none;margin-top:10px;border-top:1px dashed var(--c);padding-top:10px;cursor:auto}
+  .card.open .detail{display:block}
+  .why{background:#fff;border-left:5px solid var(--c);border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.95rem}
+  .why b.l{color:var(--c)}
+  .warn{background:#fffbeb;border-left:5px solid #b45309;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.93rem}
+  .warn b.l{color:#b45309}
+  .good{background:#ecfdf5;border-left:5px solid #16a34a;border-radius:8px;padding:8px 12px;margin:10px 0;font-size:.93rem}
+  .fix{background:#fff7ed;border-left:5px solid #ea580c;border-radius:8px;padding:8px 12px;margin:8px 0;font-size:.93rem}
+  hr.d{border:0;border-top:1px dashed var(--c);margin:16px 0}
+  #c1{--c:#6b7280;--bg2:#eef0f3}
+  #c2{--c:var(--emb);--bg2:#e6f0fa}
+  #c3{--c:var(--mha);--bg2:#f1e6f7}
+  #c4{--c:var(--ffn);--bg2:#fdf0dc}
+  #c5{--c:var(--lm);--bg2:#e0f4f3}
+  #c6{--c:var(--sm);--bg2:#e5f5e7}
+  #c7{--c:var(--bp);--bg2:#fbe9e7}
+  .block{border:3px dashed #334155;border-radius:20px;padding:12px;margin:6px 0;background:#ffffff80}
+  .block>.tag{text-align:center;font-weight:700;margin-bottom:8px}
+  .row{display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0}
+  .tok{background:#fff;border:2px solid #9ca3af;border-radius:8px;padding:6px 12px;font-family:ui-monospace,Consolas,monospace}
+  .grid{display:grid;gap:3px}
+  .cell{background:var(--c);opacity:.75;border-radius:2px;height:12px}
+  .mini{display:inline-block;text-align:center;font-size:.78rem;color:var(--muted)}
+  .heads{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:8px 0}
+  .head{background:var(--c);color:#fff;border-radius:6px;text-align:center;font-size:.72rem;padding:6px 0;cursor:pointer;transition:.2s}
+  .head.sel{outline:3px solid #111;transform:translateY(-3px)}
+  .qkv3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+  .qkv3 div{background:#fff;border-radius:10px;border-top:5px solid var(--c);padding:8px;font-size:.9rem}
+  .bars{display:flex;align-items:flex-end;gap:6px;justify-content:center;height:90px;margin:8px 0}
+  .bar{width:46px;background:#bbdbbf;border-radius:6px 6px 0 0;position:relative;transition:height .6s}
+  .bar.win{background:var(--sm)}
+  .bar span{position:absolute;top:-18px;left:0;right:0;text-align:center;font-size:.75rem}
+  .bar i{position:absolute;bottom:-18px;left:-6px;right:-6px;text-align:center;font-size:.72rem;font-style:normal}
+  .expand{display:flex;align-items:center;gap:6px;justify-content:center;flex-wrap:wrap}
+  .ebar{height:26px;border-radius:6px;color:#fff;font-size:.75rem;display:flex;align-items:center;justify-content:center;background:var(--c);padding:0 6px}
+  .dim-row{display:grid;grid-template-columns:150px 1fr 44px;gap:8px;align-items:center;margin:4px 0;font-size:.9rem}
+  .dim-track{background:#fff;border-radius:6px;height:16px;overflow:hidden;border:1px solid #cfe0f2}
+  .dim-fill{height:100%;background:var(--emb);width:0;transition:width .5s}
+  .dim-row span.n{font-family:ui-monospace,Consolas,monospace;text-align:right}
+  .pt{width:100%;border-collapse:collapse;font-size:.88rem;margin:8px 0;background:#fff;border-radius:10px;overflow:hidden}
+  .pt th,.pt td{padding:5px 8px;text-align:right;border-bottom:1px solid #e2e8f0;font-family:ui-monospace,Consolas,monospace}
+  .pt th:first-child,.pt td:first-child{text-align:left;font-family:inherit}
+  .pt th{background:#eef2f7;font-family:inherit}
+  .pos{color:#b45309}.tot{font-weight:700;color:#2f6fb0}
+  .pbar{display:inline-block;height:12px;background:var(--mha);border-radius:4px;vertical-align:middle}
+  input[type=range]{width:100%;max-width:420px}
+  .mono{font-family:ui-monospace,Consolas,monospace}
+  .gl td:first-child{font-weight:700;white-space:nowrap}
+  .gl td{text-align:left!important;font-family:inherit!important}
+  .quiz{margin-top:30px;background:#fff;border-radius:16px;padding:16px 18px;border:1px solid #e2e8f0}
+  .quiz button{margin:4px 6px 0 0}
+  .ok{color:#15803d}.no{color:#b91c1c}
+  footer{text-align:center;color:var(--muted);font-size:.82rem;margin-top:30px}
+  @media(max-width:560px){h1{font-size:1.5rem}.qkv3{grid-template-columns:1fr}.head{font-size:.6rem}
+    .dim-row{grid-template-columns:105px 1fr 38px;font-size:.78rem}}
+
+  .navbar{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:6px 0 14px}
+  .navbar a{padding:8px 16px;border-radius:999px;border:1px solid #cbd5e1;background:#fff;color:#111827;text-decoration:none;font-size:.92rem}
+  .navbar a.cur{background:#111827;color:#fff;border-color:#111827;pointer-events:none}
+  a.lnk{color:#2f6fb0;font-weight:600}
+  .flow{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin:10px 0}
+  .fbox{background:#fff;border:2px solid var(--c);border-radius:10px;padding:6px 10px;font-size:.84rem;text-align:center;max-width:140px}
+  .fbox b{color:var(--c)}
+  .farr{color:#94a3b8;font-size:1.2rem}
+  .ctxrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .ctxrow .tok{text-align:center;font-size:.9rem}
+  .mrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin:8px 0}
+  .mrow .op{font-size:1.3rem;font-weight:700;color:#64748b}
+  .mcap{text-align:center;font-size:.78rem;color:var(--muted);margin-bottom:2px}
+  .mt{width:auto!important;margin:0!important}
+  .mt td{text-align:center!important;min-width:44px}
+  .mt td.rl{color:#6b7280;background:#f1f5f9;font-family:inherit;font-size:.72rem;text-align:left!important}
+  .mt.lock td:not(.rl){background:#f1f5f9;color:#475569}
+  .mt.res td:not(.rl){background:#eaf2fb;color:#1d4f8f;font-weight:600}
+  .xi{width:56px;text-align:center;border:2px solid #f59e0b;background:#fffbeb;border-radius:6px;padding:4px;font:inherit}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>GPT-2 Çıkarım (Inference) Akışı</h1>
+  <div class="sub">GPT-2 (Generative Pre-trained Transformer 2 / Üretken Önceden Eğitilmiş Dönüştürücü 2) &nbsp;·&nbsp; Girdi: <b>"Sabah armut"</b> → Tahmin: <b>"yedim"</b><br>Küçük model: 768 boyut, 12 blok, 12 baş<br>Bu sayfada model <b>hazır ve eğitilmiş</b> kabul edilir, ağırlıklar sabittir. Sayıların nereden geldiği için <a class="lnk" href="GPT2_Egitim.html">Eğitim sayfasına</a> bak.</div>
+  <div class="navbar"><a class="cur" href="GPT2_Mimari.html">▶ Çıkarım (Inference): model nasıl çalışır?</a><a href="GPT2_Egitim.html">🎓 Eğitim (Training): sayılar nasıl öğrenilir?</a></div>
+
+  <div class="controls">
+    <button id="play">▶ Adım adım oynat</button>
+    <button class="alt" id="prev">◀ Geri</button>
+    <button class="alt" id="next">İleri ▶</button>
+    <button class="alt" id="toggleAll">Hepsini aç / kapat</button>
+  </div>
+
+  <div class="tracker">
+    <span>Şu anki tensör şekli:</span>
+    <b id="shape">—</b>
+    <span id="shapeNote" style="font-size:.85rem;color:#cbd5e1">Bir kartın başlığına tıkla veya oynat'a bas</span>
+  </div>
+
+  <!-- 1 -->
+  <section class="card open" id="c1" data-shape="2 token" data-note="Metin → sayılar">
+    <h2>1. Giriş &amp; Tokenizer (Parçalayıcı) <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="row"><span class="tok">"Sabah armut"</span> → <span class="tok">[102, 40120]</span> <span>(2 Token ID)</span></div>
+    <div class="detail">
+      <div class="why"><b class="l">Neden?</b> Model harf/kelime bilmez, sadece sayı bilir. Tokenizer (Parçalayıcı) metni parçalara (token) böler ve her parçaya sözlükteki numarasını, yani ID'yi (Identifier / Kimlik numarası) verir. Sözlükte 50.257 parça var.</div>
+      <div class="row"><span class="tok">Sabah → 102</span><span class="tok">armut → 40120</span></div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- 2 -->
+  <section class="card open" id="c2" data-shape="2 × 768" data-note="Anlam + sıra bilgisi toplandı">
+    <h2>2. Embedding (Gömme / Anlam vektörü) + Konum (Position) <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="row">
+      <div class="mini"><b>Kelime Tablosu</b><br>50.257 × 768<br>
+        <div class="grid" style="grid-template-columns:repeat(12,10px);margin-top:4px" data-rand="60"></div></div>
+      <b style="font-size:1.4rem">+</b>
+      <div class="mini"><b>Konum Tablosu</b><br>1.024 × 768<br>
+        <div class="grid" style="grid-template-columns:repeat(12,10px);margin-top:4px" data-rand="60"></div></div>
+      <b style="font-size:1.4rem">=</b>
+      <div class="mini"><b>Nihai Giriş</b><br><span class="chip">2 × 768</span></div>
+    </div>
+    <div class="detail">
+      <div class="why"><b class="l">Neden?</b> Kelimenin anlamı ile cümledeki sırası toplanır. Konum tablosu da eğitimle öğrenilir.</div>
+      <ul>
+        <li>Kelime tablosundan <b>Token ID'ye bakılır</b> → 2 satır çekilir: <span class="chip">2 × 768</span></li>
+        <li>Konum tablosuna ID'ye değil, <b>SIRAYA</b> bakılır: Sıra 0 ("Sabah"), Sıra 1 ("armut") → ilk 2 satır çekilir <span class="chip">2 × 768</span></li>
+        <li>1.024 sınırı = GPT-2'nin sabit hafıza limiti (en fazla 1.024 token görebilir).</li>
+      </ul>
+
+      <hr class="d">
+      <h3>💡 Bu 768 sayı ne demek?</h3>
+      <div>Her kelime <b>768 sayıdan oluşan bir liste</b>dir. Her sayıyı, kelimenin bir "konu / özellik" ile ilgisini ölçen bir kadran gibi düşünebilirsin.</div>
+      <div class="row" style="margin-top:10px">
+        <button class="alt wbtn sel" data-w="0">"Sabah"</button>
+        <button class="alt wbtn" data-w="1">"armut"</button>
+      </div>
+      <div id="dimBars"></div>
+      <div class="mini" style="display:block;text-align:center;margin:4px 0 8px">… böyle devam edip 768. boyuta kadar gider</div>
+      <div class="warn"><b class="l">⚠️ Önemli: Bu sadece insanın anlaması için bir örnek.</b><br>
+        Gerçekte boyutların <b>adı yoktur</b>. "1. boyut = zaman, 2. boyut = meyve" diye kimse yazmaz.
+        Bu sayıları ve her boyutun neyi temsil edeceğini <b>yapay zekanın kendisi, eğitim sırasında backpropagation (geri yayılım) ile</b> bulur (bkz. <a class="lnk" href="GPT2_Egitim.html">Eğitim sayfası</a>).
+        Üstelik gerçek modelde bir kavram genelde tek boyutta durmaz, <b>birçok boyuta yayılır</b>; bir boyut da birden fazla kavrama karışabilir.</div>
+      <div style="margin-top:8px"><b>Gerçekte bir kelime böyle görünür</b> (adsız, pozitif ve negatif sayılar):
+        <div class="tok" style="margin-top:6px;font-size:.85rem;overflow-x:auto;white-space:nowrap" id="realVec"></div>
+        <div style="font-size:.85rem;color:var(--muted);margin-top:4px">Anlam tek tek sayılarda değil, 768 sayının birlikte oluşturduğu desendedir. Benzer kelimelerin desenleri birbirine yakındır.</div></div>
+
+      <hr class="d">
+      <h3>📍 Konum vektörü: sezgisi ne?</h3>
+      <div class="why"><b class="l">Kelime vektörü "NE?" sorusunu cevaplar, konum vektörü "NEREDE?" sorusunu.</b><br>
+        Kelime vektörü "armut"un ne olduğunu söyler (meyve, tatlı...). Ama <b>cümlede kaçıncı sırada durduğunu</b> söylemez. Bunu konum vektörü ekler.</div>
+      <ul>
+        <li><b>Neden gerekli?</b> Attention (Dikkat) kelimelere bir <i>torba</i> gibi bakar, sıraya kör. Konum olmasa "Sabah armut yedim" ile "yedim armut Sabah" modele aynı görünürdü.</li>
+        <li><b>Mantığı:</b> Konum vektörü de 768 sayıdır. Her sayı, kelime vektöründeki <b>aynı sıradaki sayıya</b> küçük bir kaydırma ekler. Yani her "konuya" ayrı, ufak bir dokunuş yapar.</li>
+        <li><b>Benzetme:</b> Kelime vektörü bir rengin kendisi, konum vektörü o renge eklenen hafif bir ton farkı gibidir. Ya da kelime = kişi, konum = koltuk numarası. Aynı kişi 1. koltukta ya da 5. koltukta otursa kimliği aynı kalır ama "yeri" farklıdır.</li>
+        <li><b>Sonuç:</b> Aynı "armut" sıra 1'de ve sıra 5'te <b>biraz farklı</b> bir vektöre dönüşür. Model, bu küçük farktan sırayı okumayı öğrenir.</li>
+        <li><b>Neden toplama?</b> Yan yana eklesek (2 × 1536 olurdu) boyut büyürdü. Toplayınca boyut 768 kalır.</li>
+      </ul>
+      <b>Kendin dene:</b> kelime ve sırayı seç, toplamın nasıl değiştiğine bak.
+      <div class="row" style="margin-top:6px">
+        Kelime: <button class="alt pw sel" data-w="0">Sabah</button><button class="alt pw" data-w="1">armut</button>
+        &nbsp; Sıra: <button class="alt pp sel" data-p="0">0</button><button class="alt pp" data-p="1">1</button><button class="alt pp" data-p="2">2</button><button class="alt pp" data-p="5">5</button><button class="alt pp" data-p="40">40</button>
+      </div>
+      <div id="posTbl"></div>
+      <div class="warn"><b class="l">⚠️ Yine insan için örnek.</b> Konum sayıları da adsızdır. GPT-2'de <b>1.024 satırlık bir tablo</b> (her sıra için bir satır) eğitimde backpropagation ile öğrenilir. Hangi boyut neyi kodlar, model kendisi karar verir. Buradaki değerler ve "konu" isimleri uydurmadır.</div>
+
+      <hr class="d">
+      <h3>❓ Bu sayılar nereden geldi?</h3>
+      <div class="why"><b class="l">Kısaca:</b> Kelime tablosu, konum tablosu ve Wq/Wk/Wv gibi tüm sayılar eğitimde <b>kendiliğinden</b> öğrenilir. Toplanan "kelime + konum" karışımını sonraki katmanların nasıl okuduğu da orada anlatılıyor: <a class="lnk" href="GPT2_Egitim.html#sayilar">Eğitim sayfası → "Sayılar nereden geliyor?"</a></div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <div class="block">
+    <div class="tag">TRANSFORMER BLOĞU (Dönüştürücü Bloğu), 12 kere art arda tekrarlanır &nbsp; <span id="loopBadge" class="chip" style="color:#334155;border-color:#334155">Blok 1/12</span></div>
+
+    <!-- 3 -->
+    <section class="card open" id="c3" data-shape="2 × 768" data-note="Dikkat: kelimeler birbirine bakıyor">
+      <h2>3. MHA (Multi-Head Attention / Çok Başlı Dikkat) <small>başlığa tıkla: aç/kapat</small></h2>
+      <div>Yatay paralel bölünme: <span class="chip">12 baş × 64 boyut</span><br><b>X</b> (girdi, <span class="chip">2×768</span>) × <b>Wq, Wk, Wv</b> (modelin ağırlıkları, her biri <span class="chip">768×768</span>) = <b>Q, K, V</b> (her biri <span class="chip">2×768</span>)</div>
+      <div class="heads" id="heads"></div>
+      <div class="detail">
+        <div class="why"><b class="l">Neden?</b> 768 boyutlu vektör 12 eşit parçaya bölünür (her biri 2 × 64). Her baş cümleye <b>farklı bir açıdan</b> bakar (biri zamana, biri dil bilgisine, biri anlama...). Sonra hepsi birleştirilir → <span class="chip">2 × 768</span>. (Üstteki başlara tıkla: hepsi aynı anda çalışır, burada sadece vurguluyoruz.)</div>
+
+        <hr class="d">
+        <h3>🔍 Q, K, V'yi en basit haliyle anlayalım</h3>
+        <div class="qkv3">
+          <div><b>Q (Query / Sorgu)</b><br>"<b>Ne arıyorum?</b>" Soran kelimenin sorusu.</div>
+          <div><b>K (Key / Anahtar)</b><br>"<b>Ben neyim?</b>" Her kelimenin üzerindeki etiket.</div>
+          <div><b>V (Value / Değer)</b><br>"<b>Sana vereceğim bilgi bu.</b>" Kelimenin asıl içeriği.</div>
+        </div>
+        <div class="why"><b class="l">Kütüphane benzetmesi:</b> Bir kitap arıyorsun. Aklındaki istek <b>Q</b>. Her kitabın sırtında bir etiket var: <b>K</b>. Etiketleri tarayıp isteğine en çok uyanları bulursun (eşleşme puanı). Sonra o kitapların <b>içeriğini (V)</b>, uyum oranında okuyup kafanda tek bir özet oluşturursun. Dikkat (attention) tam olarak budur.</div>
+
+        <b>Aynı kelime, 3 farklı rol:</b> "armut"un vektörü <span class="chip">x</span> üç farklı matrisle çarpılır ve üç ayrı vektör çıkar:
+        <div style="text-align:center;margin:6px 0"><span class="chip">Q = x·Wq</span> <span class="chip">K = x·Wk</span> <span class="chip">V = x·Wv</span></div>
+        Neden üç tane? Çünkü "ne arıyorum", "ne olduğumu nasıl tanıtırım" ve "ne veririm" üç ayrı şeydir. Üç ayrı matris, aynı kelimeden üç ayrı rol çıkarır.
+
+        <b>3 adımda dikkat:</b>
+        <ol>
+          <li><b>Eşleşme puanı:</b> Soran kelimenin Q'sunu her kelimenin K'siyle çarp (nokta çarpım = benzerlik). Büyük sayı = iyi eşleşme.</li>
+          <li><b>Softmax (Yumuşatılmış Maksimum):</b> Puanları yüzdeye çevir (toplam %100).</li>
+          <li><b>Karıştır:</b> Her kelimenin V'sini kendi yüzdesiyle çarpıp topla. Çıkan vektör, kelimenin <b>"etrafındakilerden bilgi alınmış" yeni hali</b> olur. (Aşağıda ayrıntısı var.)</li>
+        </ol>
+        <div class="why"><b class="l">"Karıştırmak" ne demek?</b> Burada karıştırmak, <b>ağırlıklı ortalama almak</b> demek: her V vektörünü kendi yüzdesiyle çarpıp hepsini toplamak. <b>Seçim yapmıyoruz</b> ("en yüksek yüzdeliyi al" demiyoruz). <b>Herkesten payı kadar alıyoruz.</b>
+          <ul style="margin:6px 0">
+            <li><b>Boya benzetmesi:</b> %20 sarı + %80 mavi boya karıştırırsan mavimsi bir ton çıkar. Yüzde yüksek olan rengin etkisi büyük olur. Dikkatte "boyalar" V vektörleri, "yüzdeler" dikkat yüzdeleri.</li>
+            <li><b>Ders notu benzetmesi:</b> Ortalama hesaplarken kredisi yüksek ders daha çok etki eder. Burada da yüzdesi yüksek kelimenin V'si sonuca daha çok etki eder.</li>
+            <li><b>Her sütun (boyut) ayrı hesaplanır:</b> Sonuç[boyut i] = %20 × V[Sabah][i] + %80 × V[armut][i]. Vektör boyutu değişmez (4 girer, 4 çıkar).</li>
+            <li><b>Neden böyle?</b> "armut" artık sadece kendi bilgisini değil, <b>%20 oranında "Sabah" bilgisini de</b> taşıyor. Dikkat (attention) bu: bilgi kelimeler arasında yüzdelerle akıyor.</li>
+            <li><b>Karıştırma ≠ birleştirme:</b> 12 başın çıktılarını yan yana dizmek (concat / birleştirme) ayrı bir işlem. Burada aynı boyuttaki vektörler <b>üst üste toplanıyor</b>.</li>
+          </ul></div>
+        <b>Kendin dene:</b> "armut" Sabah'a ne kadar baksın? İki V vektörünün nasıl karıştığını gör (mini örnekteki V değerleri).
+        <div class="row">Sabah'a verilen yüzde: <input type="range" id="mixP" min="0" max="100" step="5" value="20"> <span class="mono" id="mixPv"></span></div>
+        <div id="mixOut"></div>
+
+        <b>Kendin dene:</b> Toy örnek, boyutlar sadece 2: [zaman, meyve]. Soran kelimeyi seç.
+        <div class="row">
+          Soran: <button class="alt qw" data-q="armut">armut</button><button class="alt qw" data-q="Sabah">Sabah</button>
+        </div>
+        <div class="row" id="qsliderRow">
+          armut'un sorusu "zaman bilgisi arıyorum": <input type="range" id="qslider" min="0" max="2" step="0.05" value="1"> <span class="mono" id="qval"></span>
+        </div>
+        <div id="qkvOut"></div>
+        <div class="warn"><b class="l">⚠️ Sadeleştirmeler:</b> (1) Gerçekte Q ve K 64 boyutludur ve puanlar √64'e bölünür (scaled dot-product / ölçekli nokta çarpım), burada bölmedik. (2) "Zaman arıyorum" gibi anlamları biz uydurduk; gerçekte Wq, Wk, Wv <b>backpropagation ile kendiliğinden öğrenilir</b>, kimse onlara anlam yazmaz. (3) Sabah sadece kendini görür çünkü GPT-2 geleceğe bakamaz (causal mask / nedensel maske): her kelime sadece kendinden önceki kelimelere ve kendine bakar.</div>
+        <hr class="d">
+        <h3>🧮 Q, K, V tam olarak nedir ve nereden gelir?</h3>
+        <div class="why"><b class="l">Önce karışıklığı çözelim.</b> Üç ayrı şey var:
+          <ul style="margin:6px 0">
+            <li><b>X</b> = girdi (<span class="chip">2×768</span>): "Sabah armut"un vektörleri. <b>Her cümlede değişir.</b></li>
+            <li><b>Wq, Wk, Wv</b> = ağırlık matrisleri (her biri <span class="chip">768×768</span>): <b>Modelin parçasıdır, eğitimden gelir, çıkarımda değişmez.</b> 🔒</li>
+            <li><b>Q, K, V</b> = çarpımın sonucu (her biri <span class="chip">2×768</span>): <b>Her girdi için o an hesaplanır</b>, modelde saklı değildir.</li>
+          </ul>
+          Yani "768×768" olan Q, K, V değil, onları üreten <b>ağırlıklardır</b>.</div>
+        <div class="why"><b class="l">"Q, K, V'yi model nasıl buluyor?"</b> Bulmuyor, <b>hesaplıyor</b>: <span class="chip">Q = X·Wq</span>, <span class="chip">K = X·Wk</span>, <span class="chip">V = X·Wv</span>. Aynı X, üç farklı matrisle çarpıldığı için üç farklı vektör çıkar.<br>
+          <b>Roller nereden geliyor?</b> İki katman var:
+          <ol style="margin:6px 0">
+            <li><b>Formülün yapısı:</b> Q ile K çarpılıp <i>puan</i> çıkarılır. V ise o puanlardan çıkan yüzdelerle <i>karıştırılır</i>. Roller bu yerleşimden gelir.</li>
+            <li><b>Sayıların içeriği:</b> Başta üç matris de rastgele ve birbirinden bağımsızdır. Eğitimde Wq ve Wk, "puanlar doğru kelimelere yüksek çıksın" yönünde, Wv ise "karışım işe yarar bilgi taşısın" yönünde kayar. Farklı işe yaradıkları için farklı sayılara oturur. (Bkz. <a class="lnk" href="GPT2_Egitim.html#sayilar">Eğitim sayfası</a>)</li>
+          </ol>
+          Not: Gerçek GPT-2'de üç matris tek bir büyük matriste (768×2304) saklanır. Mantık aynı.</div>
+
+        <b>Gerçek sayılarla örnek.</b> 768 yerine <b>4 boyutlu</b> mini model, tek baş, 2 token. Aşağıdaki her sayı o an hesaplanıyor. <b>Girdi X'in sayılarını değiştirip</b> (sarı kutular) Q, K, V'nin değiştiğini, ağırlıkların (🔒) ise sabit kaldığını gör.
+        <div id="xin" class="row"></div>
+        <div id="qkvCalc"></div>
+        <div class="warn"><b class="l">⚠️ Sayılar uydurma.</b> Ağırlıkları elle okunaklı seçtim, gerçek GPT-2 değerleri değil. Ayrıca başlangıç değerlerinde "armut" Sabah'a %20 bakıyor (sarı kutuları değiştirince oran değişir). Yukarıdaki 2 boyutlu örnekte %65'ti. İkisi farklı mini örnekler, sayılar bilerek farklı.</div>
+
+        <b>Modelden gelen ve her girdide hesaplanan şeyler:</b>
+        <table class="pt gl" style="margin-top:6px">
+          <tr><th>🔒 Modelden gelir, sabit (eğitimde öğrenildi)</th><th>🔄 Her girdide yeniden hesaplanır</th></tr>
+          <tr><td>Kelime tablosu (50.257×768) ve konum tablosu (1.024×768)</td><td>X: girdi vektörleri (2×768)</td></tr>
+          <tr><td>Wq, Wk, Wv (768×768) ve birleştirme sonrası çıkış matrisi</td><td>Q, K, V (2×768), dikkat puanları, yüzdeler</td></tr>
+          <tr><td>FFN ağırlıkları: 768×3.072 ve 3.072×768</td><td>FFN ara sonucu (2×3.072)</td></tr>
+          <tr><td>LM Head (kelime tablosuyla paylaşılır)</td><td>Logits (1×50.257) ve olasılıklar</td></tr>
+        </table>
+        <div style="font-size:.88rem;color:var(--muted);margin-top:4px">Soldaki her şey "modelin dosyası"dır (GPT-2 small'da yaklaşık 124 milyon sayı). Çıkarımda bu sayılara dokunulmaz.</div>
+
+      </div>
+    </section>
+    <div class="arrow">↓</div>
+
+    <!-- 4 -->
+    <section class="card open" id="c4" data-shape="2 × 3.072" data-note="FFN içinde geçici genişleme">
+      <h2>4. FFN (Feed-Forward Network / İleri Beslemeli Ağ) + GELU (Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi) <small>başlığa tıkla</small></h2>
+      <div class="expand">
+        <div class="ebar" style="width:90px">768</div> →
+        <div class="ebar" style="width:260px">3.072 (×4)</div> →
+        <div class="ebar" style="width:90px">768</div>
+      </div>
+      <div class="why"><b class="l">💡 Sezgi (tek cümlede):</b> Attention'da kelimeler birbirinden bilgi aldı. FFN'de <b>her kelime kendi masasına döner ve o bilgiyi tek başına işler</b>: genişlet (3.072 soru sor) → kapıdan geçir (GELU) → özetle (768).</div>
+      <div class="detail">
+        <div class="why"><b class="l">1) Attention ile FFN'nin farkı (toplantı benzetmesi)</b><br>
+          <b>Attention = toplantı.</b> Kelimeler birbirine bakar, bilgi alışverişi yapar ("armut" Sabah'tan bilgi aldı).<br>
+          <b>FFN = toplantıdan sonra masa başı.</b> Her kelime kendi masasına döner ve aldığı bilgiyi <b>tek başına</b> işler. Bu aşamada kelimeler birbirine <b>karışmaz</b>: her token aynı işleme makinesinden ayrı ayrı geçer (aynı ağırlıklar, ayrı hesap).</div>
+
+        <h3>2) Genişlet → Kapıdan geçir → Özetle</h3>
+        <div class="why"><b class="l">Kontrol listesi benzetmesi.</b> 768 sayılık vektör, kelimenin "kısa özeti"dir. FFN bu özeti alıp 3.072 maddelik uzun bir <b>kontrol listesinden</b> geçirir:
+          <ol style="margin:6px 0">
+            <li><b>Genişletme (768 → 3.072):</b> Her madde bir <b>soru</b>: "Bu kelime kahvaltı bağlamında mı?", "tatlı bir meyve mi?", "canlı bir şey mi?"... 3.072 soru, her biri için bir <b>"ne kadar evet"</b> puanı. <span class="chip">2×768</span> × <span class="chip">768×3.072</span> = <span class="chip">2×3.072</span></li>
+            <li><b>GELU (kapı):</b> "Evet" diyen maddeler <b>açık kalır</b> (puan korunur), "hayır" diyenler <b>kapanır</b> (puan sıfıra yakın).</li>
+            <li><b>Özetleme (3.072 → 768):</b> Açık kalan her madde, kendi bilgisini 768'lik vektöre <b>ekler</b> ("bu bir kahvaltı yiyeceği" gibi). Sonuç tekrar küçük: <span class="chip">2×3.072</span> × <span class="chip">3.072×768</span> = <span class="chip">2×768</span></li>
+          </ol>
+          <b>Neden 4 kat (3.072)?</b> Soru sayısı, modelin "hafıza kapasitesi" gibidir. Ne kadar çok soru sorabilirse o kadar çok ayrıntıyı yakalar. 4 kat, tasarımcıların seçtiği bir orandır, doğa kanunu değil.</div>
+
+        <h3>3) İki matris neyi temsil ediyor?</h3>
+        <ul>
+          <li><b>W1 (768×3.072):</b> 3.072 sütunun her biri bir <b>dedektör</b>, yani 768 sayılık bir "kalıp". Girdi bu kalıba ne kadar benziyorsa (nokta çarpım) puan o kadar yüksek. "Bu madde ne zaman tetiklensin?" sorusunun cevabı.</li>
+          <li><b>W2 (3.072×768):</b> 3.072 satırın her biri "bu dedektör açıksa vektöre <b>ne ekleyeyim</b>" bilgisi.</li>
+          <li>Bir yorum olarak FFN, "anahtar–değer hafızası" gibi düşünülür: W1 = ne zaman tetiklensin, W2 = tetiklenince ne yazsın. (Dikkat: bu, attention'daki Q/K/V ile aynı şey <b>değil</b>.)</li>
+          <li>İkisi de <b>eğitimde öğrenilir</b>. Hangi dedektörün neyi yakalayacağına kimse karar vermez.</li>
+        </ul>
+
+        <h3>4) Kapı (GELU) neden şart?</h3>
+        <div class="why">Kapı olmazsa iki matris art arda çarpılır ve <b>tek bir matrise indirgenir</b> (W1 × W2 = tek matris). 3.072'ye genişletmenin hiçbir anlamı kalmaz. Küçük bir sayı örneği: iki işlem düşün, "×3" sonra "×2".
+          <div class="row">Giriş x: <input type="range" id="gateX" min="-3" max="3" step="0.5" value="-1"> <span class="mono" id="gateXv"></span></div>
+          <div id="gateOut"></div>
+          Kapısız hâli hep "×6"dır, yani tek bir çarpmayla yapılabilir. Kapı ise "negatifse sustur" diyen, <b>tek bir çarpmayla yapılamayan</b> bir davranış ekler. "Doğrusal olmayan" (non-linear) tam olarak budur. (Burada kapı olarak basit "negatifi sıfırla" kullandım. GELU bunun pürüzsüz, yumuşak halidir.)</div>
+
+        <h3>5) Gerçek sayılarla mini örnek (4 → 8 → 4)</h3>
+        <div>768 yerine <b>4</b>, 3.072 yerine <b>8</b> boyut. Kelime vektörü 4 sayı: <b>[zaman, yiyecek, tatlılık, canlılık]</b>. 8 dedektör var. Bir kelime seç ve hangi dedektörlerin açıldığını gör.</div>
+        <div class="row">
+          <button class="alt ffw" data-f="0">Sabah</button>
+          <button class="alt ffw" data-f="1">armut (tek başına)</button>
+          <button class="alt ffw" data-f="2">armut (Sabah'tan bilgi almış)</button>
+        </div>
+        <div style="font-size:.85rem;color:var(--muted);text-align:center">Son seçenek, attention'dan sonra FFN'ye giren halidir: önceki örnekteki gibi %20 Sabah + %80 armut karışımı.</div>
+        <div id="ffnOut"></div>
+        <div class="warn"><b class="l">⚠️ Uydurma değerler.</b> Dedektör isimleri ve sayılar anlatım için uydurulmuştur. Gerçek modelde 3.072 dedektörün çoğunun insanın koyabileceği tek bir adı yoktur, kavramlar birçok dedektöre yayılır ve hepsi eğitimle kendiliğinden oluşur. Gerçek GPT-2'de FFN çıkışı girişe eklenir (residual connection / artık bağlantı). Bu sayfa henüz onu anlatmıyor. GELU sonrası küçük negatif değerler (−0,17 gibi) normaldir, aşağıdaki GELU grafiğine bak.</div>
+
+        <div class="good"><b>🔒 FFN ağırlıkları da modelden gelir.</b> Genişletme matrisi (768×3.072) ve özetleme matrisi (3.072×768) eğitimde öğrenilmiş sabit sayılardır, çıkarımda değişmez. Her girdide yeniden hesaplanan tek şey <b>ara sonuçtur</b> (2×3.072).</div>
+        <hr class="d">
+        <h3>📈 GELU nasıl davranıyor? Kaydırıp bak</h3>
+        <div class="row">x değeri: <input type="range" id="gx" min="-4" max="4" step="0.05" value="1"> <span class="mono" id="gxv"></span></div>
+        <svg id="gsvg" viewBox="0 0 400 220" style="width:100%;max-width:520px;display:block;margin:0 auto;background:#fff;border-radius:10px"></svg>
+        <table class="pt" style="max-width:520px;margin:8px auto">
+          <tr><th>Fonksiyon</th><th>Çıktı</th></tr>
+          <tr><td style="color:#6b7280">ReLU (Rectified Linear Unit / Doğrultulmuş Doğrusal Birim)</td><td id="rOut"></td></tr>
+          <tr><td style="color:#e08a1e">GELU</td><td id="gOut"></td></tr>
+        </table>
+        <div class="fix"><b>🔧 GELU hep pozitif değildir.</b> Hep sıfır ya da pozitif olan <b>ReLU</b>'dur. GELU negatif girişte <b>küçük negatif değerler</b> verebilir: en düşük noktası yaklaşık <b>−0,17</b> (x ≈ −0,75 civarı), daha da negatife gidince sıfıra yaklaşır. Kaydırıcıyı −0,75'e getirip kendin gör. Negatifleri "tam sıfırlamaz", sıfıra yakın bir değere söndürür.</div>
+        <div class="why"><b class="l">Neden ReLU değil de GELU?</b> Bu sorunun cevabı <b>türevle</b> ilgili, yani eğitimle. Burada sadece şunu bil: GELU pürüzsüz bir eğridir, ReLU'nun keskin köşesi yoktur. Detay için: <a class="lnk" href="GPT2_Egitim.html#aktivasyon">Eğitim sayfası → "Aktivasyonun türevi"</a></div>
+      </div>
+    </section>
+  </div>
+  <div class="arrow">↓</div>
+
+  <!-- 5 -->
+  <section class="card open" id="c5" data-shape="1 × 768 → 1 × 50.257" data-note="Sadece son token kullanılır">
+    <h2>5. LM Head (Language Model Head / Dil Modeli Çıkış Katmanı) <small>başlığa tıkla</small></h2>
+    <div class="row">Son Token <span class="chip">1 × 768</span> × <span class="chip">768 × 50.257</span> → <span class="chip">1 × 50.257</span> Logits (Ham puanlar)</div>
+    <div class="detail">
+      <div class="why"><b class="l">Neden sadece son token?</b> Bir sonraki kelimeyi tahmin ederken "armut" konumundaki vektör, tüm cümlenin özetini taşır. Sözlükteki her kelime için bir puan üretilir.</div>
+      <div class="warn"><b class="l">Ek bilgi (weight tying / ağırlık paylaşımı):</b> GPT-2'de bu 768 × 50.257 matris ayrı bir tablo değildir. Aynı kelime embedding tablosunun (50.257 × 768) ters çevrilmiş (transpoze) halidir. Yani giriş ve çıkış aynı ağırlıkları paylaşır. Eğitimde bu tabloya gradyan iki yönden gelir.</div>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
+  <!-- 6 -->
+  <section class="card open" id="c6" data-shape="1 × 50.257 olasılık" data-note="Toplam = %100">
+    <h2>6. Softmax (Yumuşatılmış Maksimum) &amp; Seçim <small>başlığa tıkla</small></h2>
+    <div class="row">Ham puanlar % olasılığa çevrilir → en yüksek: <b>"yedim"</b></div>
+    <div class="detail">
+      <div class="bars" id="smBars"></div>
+      <div class="row" style="margin-top:34px">Temperature (Sıcaklık): <input type="range" id="temp" min="0.2" max="3" step="0.05" value="1"> <span class="mono" id="tempv"></span></div>
+      <div class="row"><button class="alt" id="draw">🎲 Olasılığa göre kura çek</button> <span id="drawRes"></span></div>
+      <div class="why"><b class="l">Sezgi:</b> Sıcaklık düşükse model hep en yüksek olasılıklıyı seçer (tutarlı, tekdüze). Yüksekse olasılıklar birbirine yaklaşır, daha şaşırtıcı (ama daha hatalı olabilen) seçimler çıkar. Gerçek sistemlerde çoğu zaman "en yükseği al" yerine olasılığa göre kura çekilir.</div>
+      <p style="font-size:.85rem;color:var(--muted);margin-top:26px">Not: Yüzdeler anlatım için uydurma örnek değerlerdir. Sıcaklık T için: yeni olasılık ∝ eski olasılık^(1/T).</p>
+    </div>
+  </section>
+  <div class="arrow">↓ (seçilen kelime girdiye eklenir, akış başa döner)</div>
+
+  <!-- 7 -->
+  <section class="card open" id="c7" data-shape="Girdi 1 token uzar" data-note="Her turda 1 yeni token">
+    <h2>7. Üretim Döngüsü (Autoregressive / Kendi çıktısını girdi yapan üretim) <small>başlığa tıkla</small></h2>
+    <div>Model aynı anda tüm cümleyi değil, <b>sadece bir sonraki token'ı</b> üretir. Seçileni girdiye ekler ve 1–6. adımları baştan çalıştırır. ChatGPT'nin kelime kelime yazması bundan.</div>
+    <div class="detail">
+      <div class="row"><button id="genStep">▶ Bir token üret</button><button class="alt" id="genReset">Sıfırla</button></div>
+      <div id="genOut"></div>
+      <ul>
+        <li><b>Neden sadece son token?</b> 5. kartta gördüğün gibi her turda yalnızca son konumun vektörü puana çevrilir.</li>
+        <li><b>Boşa hesap yapmıyor mu?</b> Eski token'ların K ve V vektörleri her turda aynı çıkar. Bu yüzden saklanır: KV cache (Key-Value Cache / Anahtar-Değer Önbelleği). Her turda sadece yeni token hesaplanır.</li>
+        <li><b>Ne zaman durur?</b> Model özel bir bitiş token'ı seçince (GPT-2'de &lt;|endoftext|&gt;) ya da uzunluk sınırına gelince (1.024 token).</li>
+        <li><b>Çıkarımda hedef bilinmez:</b> Doğru cevap yok, model kendi tahminini üretir. Hata hesaplanmaz, ağırlıklar değişmez. Hata ve güncelleme <a class="lnk" href="GPT2_Egitim.html">Eğitim sayfasının</a> konusu.</li>
+      </ul>
+      <div class="warn"><b class="l">⚠️</b> Token ID'ler ve olasılıklar anlatım için uydurmadır.</div>
+    </div>
+  </section>
+
+  <div class="quiz">
+    <b>📖 Kısaltmalar sözlüğü</b>
+    <table class="pt gl" style="margin-top:8px">
+      <tr><td>Autoregressive</td><td>Autoregressive / Kendi çıktısını girdi yapan (kendinden geriye bağlı) üretim</td></tr>
+      <tr><td>KV cache</td><td>Key-Value Cache / Anahtar-Değer Önbelleği</td></tr>
+      <tr><td>Temperature</td><td>Temperature / Sıcaklık (seçimin ne kadar rastgele olacağını ayarlar)</td></tr>
+      <tr><td>GPT</td><td>Generative Pre-trained Transformer / Üretken Önceden Eğitilmiş Dönüştürücü</td></tr>
+      <tr><td>ID</td><td>Identifier / Kimlik numarası</td></tr>
+      <tr><td>Token</td><td>Token / Metnin parçası (sözcük ya da sözcük parçası)</td></tr>
+      <tr><td>Embedding</td><td>Embedding / Gömme: bir token'ın sayı listesi (vektör) olarak temsili</td></tr>
+      <tr><td>MHA</td><td>Multi-Head Attention / Çok Başlı Dikkat</td></tr>
+      <tr><td>Q, K, V</td><td>Query / Sorgu, Key / Anahtar, Value / Değer</td></tr>
+      <tr><td>W, Wq, Wk, Wv</td><td>Weight / Ağırlık matrisi (Q, K, V'yi üreten matrisler)</td></tr>
+      <tr><td>FFN</td><td>Feed-Forward Network / İleri Beslemeli Ağ</td></tr>
+      <tr><td>GELU</td><td>Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi</td></tr>
+      <tr><td>ReLU</td><td>Rectified Linear Unit / Doğrultulmuş Doğrusal Birim</td></tr>
+      <tr><td>LM Head</td><td>Language Model Head / Dil Modeli Çıkış Katmanı</td></tr>
+      <tr><td>Logits</td><td>Logits / Ham puanlar (henüz yüzdeye çevrilmemiş)</td></tr>
+      <tr><td>Softmax</td><td>Softmax / Yumuşatılmış Maksimum: puanları yüzdeye çeviren fonksiyon</td></tr>
+      <tr><td>Causal mask</td><td>Causal Mask / Nedensel Maske (geleceğe bakmayı engeller)</td></tr>
+    </table>
+  </div>
+
+  <div class="quiz">
+    <b>🧠 Mini test:</b> GPT-2'de bir cümle en fazla kaç token olabilir?
+    <div id="quizBtns"></div>
+    <div id="quizRes" style="margin-top:8px"></div>
+  </div>
+
+  <footer>Gemini görselinden etkileşimli HTML'e dönüştürüldü · Eğitim kısmı için <a class="lnk" href="GPT2_Egitim.html">GPT2_Egitim.html</a></footer>
+</div>
+
+<script>
+
+const cards=[...document.querySelectorAll('.card')];
+let idx=-1, timer=null;
+
+document.querySelectorAll('[data-rand]').forEach(g=>{
+  for(let i=0;i<+g.dataset.rand;i++){const c=document.createElement('div');c.className='cell';c.style.opacity=(.3+Math.random()*.7).toFixed(2);g.appendChild(c)}
+});
+const heads=document.getElementById('heads');
+for(let i=1;i<=12;i++){const h=document.createElement('div');h.className='head';h.textContent='Baş '+i;
+  h.onclick=e=>{e.stopPropagation();h.classList.toggle('sel')};heads.appendChild(h)}
+
+
+// ---------- 768 boyut örneği ----------
+const dims=[['Gün zamanı',[0.92,0.02]],['Meyve / yiyecek',[0.03,0.95]],['Tatlılık',[0.10,0.70]],
+  ['Canlı / doğal',[0.15,0.80]],['Soyut kavram',[0.75,0.08]],['Olumlu duygu',[0.50,0.40]]];
+const db=document.getElementById('dimBars');
+dims.forEach(([n])=>{const r=document.createElement('div');r.className='dim-row';
+  r.innerHTML='<span>'+n+'</span><div class="dim-track"><div class="dim-fill"></div></div><span class="n"></span>';db.appendChild(r)});
+function showWord(w){
+  document.querySelectorAll('.wbtn').forEach(b=>b.classList.toggle('sel',+b.dataset.w===w));
+  [...db.children].forEach((r,i)=>{const v=dims[i][1][w];
+    r.querySelector('.dim-fill').style.width=(v*100)+'%';r.querySelector('.n').textContent=v.toFixed(2)});
+}
+document.querySelectorAll('.wbtn').forEach(b=>b.onclick=e=>{e.stopPropagation();showWord(+b.dataset.w)});
+setTimeout(()=>showWord(0),100);
+document.getElementById('realVec').textContent='['+Array.from({length:10},()=>(Math.random()*2-1).toFixed(2)).join(', ')+', … 758 sayı daha]';
+
+// ---------- konum vektörü demosu ----------
+let pwI=0,ppI=0;
+function posVal(p,i){return 0.12*Math.sin(0.35*p+1.9*i+0.6)}
+function renderPos(){
+  const w=pwI,p=ppI;
+  let h='<table class="pt"><tr><th>Boyut (örnek konu)</th><th>Kelime</th><th>+ Konum</th><th>= Toplam</th></tr>';
+  dims.forEach(([n,v],i)=>{const a=v[w],b=posVal(p,i);
+    h+='<tr><td>'+n+'</td><td>'+a.toFixed(2)+'</td><td class="pos">'+(b>=0?'+':'')+b.toFixed(2)+'</td><td class="tot">'+(a+b).toFixed(2)+'</td></tr>'});
+  h+='<tr><td colspan="4" style="text-align:center;color:#6b7280">… 768 boyuta kadar</td></tr></table>';
+  document.getElementById('posTbl').innerHTML=h;
+}
+document.querySelectorAll('.pw').forEach(b=>b.onclick=e=>{e.stopPropagation();pwI=+b.dataset.w;
+  document.querySelectorAll('.pw').forEach(x=>x.classList.toggle('sel',x===b));renderPos()});
+document.querySelectorAll('.pp').forEach(b=>b.onclick=e=>{e.stopPropagation();ppI=+b.dataset.p;
+  document.querySelectorAll('.pp').forEach(x=>x.classList.toggle('sel',x===b));renderPos()});
+renderPos();
+
+// ---------- Q K V demosu ----------
+const KV={Sabah:{K:[.9,.1],V:[1,0]},armut:{K:[.1,.9],V:[0,1]}};
+let qWord='armut';
+const dot=(a,b)=>a[0]*b[0]+a[1]*b[1];
+function renderQKV(){
+  const t=parseFloat(document.getElementById('qslider').value);
+  document.getElementById('qval').textContent='zaman = '+t.toFixed(2);
+  document.querySelectorAll('.qw').forEach(b=>b.classList.toggle('sel',b.dataset.q===qWord));
+  document.getElementById('qsliderRow').style.display=qWord==='armut'?'flex':'none';
+  const Q=qWord==='armut'?[t,0.2]:[0.2,0.8];
+  const vis=qWord==='armut'?['Sabah','armut']:['Sabah'];
+  const sc=vis.map(w=>dot(Q,KV[w].K));
+  const ex=sc.map(Math.exp), sum=ex.reduce((a,b)=>a+b,0), wt=ex.map(e=>e/sum);
+  let out=[0,0]; vis.forEach((w,i)=>{out[0]+=wt[i]*KV[w].V[0];out[1]+=wt[i]*KV[w].V[1]});
+  let h='<div style="margin:6px 0"><b>1) Soru:</b> '+qWord+' → <span class="chip">Q = ['+Q[0].toFixed(2)+', '+Q[1].toFixed(2)+']</span> (zaman, meyve)</div>';
+  h+='<table class="pt"><tr><th>Baktığı kelime</th><th>K (etiket)</th><th>Puan Q·K</th><th>Yüzde (softmax)</th><th>V (içerik)</th></tr>';
+  vis.forEach((w,i)=>{h+='<tr><td>'+w+'</td><td>['+KV[w].K.join(', ')+']</td><td>'+sc[i].toFixed(2)+'</td><td><span class="pbar" style="width:'+(wt[i]*70)+'px"></span> %'+(wt[i]*100).toFixed(0)+'</td><td>['+KV[w].V.join(', ')+']</td></tr>'});
+  h+='</table>';
+  h+='<div><b>3) Karışım:</b> yeni '+qWord+' vektörü = yüzdeler × V = <span class="chip">[zaman '+out[0].toFixed(2)+', meyve '+out[1].toFixed(2)+']</span></div>';
+  if(qWord==='armut') h+='<div class="why"><b class="l">Anlamı:</b> "armut" artık sadece meyve değil, <b>%'+(out[0]*100).toFixed(0)+' oranında "zaman (Sabah)" bilgisini de taşıyor</b>. Kaydırıcıyı artırınca Sabah\'a daha çok bakar. Böylece model "bu armut sabah yenildi" bilgisini vektöre katmış olur.</div>';
+  else h+='<div class="why"><b class="l">Anlamı:</b> Sabah ilk sıradadır, geriye bakacak kelime yok. Sadece kendine bakar, %100.</div>';
+  document.getElementById('qkvOut').innerHTML=h;
+}
+document.getElementById('qslider').oninput=renderQKV;
+document.querySelectorAll('.qw').forEach(b=>b.onclick=e=>{e.stopPropagation();qWord=b.dataset.q;renderQKV()});
+renderQKV();
+
+// ---------- GELU / ReLU ----------
+const gelu=x=>0.5*x*(1+Math.tanh(Math.sqrt(2/Math.PI)*(x+0.044715*x**3)));
+const relu=x=>Math.max(0,x);
+const gder=x=>(gelu(x+1e-4)-gelu(x-1e-4))/2e-4;
+const PX=x=>200+x*45, PY=y=>170-y*40;
+function renderG(){
+  const x=parseFloat(document.getElementById('gx').value);
+  document.getElementById('gxv').textContent='x = '+x.toFixed(2);
+  let s='<line x1="0" y1="'+PY(0)+'" x2="400" y2="'+PY(0)+'" stroke="#999" stroke-width=".7"/><line x1="'+PX(0)+'" y1="0" x2="'+PX(0)+'" y2="220" stroke="#999" stroke-width=".7"/>';
+  for(let k=-4;k<=4;k++){s+='<text x="'+PX(k)+'" y="'+(PY(0)+12)+'" font-size="8" fill="#888" text-anchor="middle">'+k+'</text>'}
+  let r='',g='';
+  for(let v=-4;v<=4.001;v+=.1){r+=PX(v).toFixed(1)+','+PY(relu(v)).toFixed(1)+' ';g+=PX(v).toFixed(1)+','+PY(gelu(v)).toFixed(1)+' '}
+  s+='<polyline points="'+r+'" fill="none" stroke="#9ca3af" stroke-width="3"/>';
+  s+='<polyline points="'+g+'" fill="none" stroke="#e08a1e" stroke-width="2.5"/>';
+  s+='<circle cx="'+PX(x)+'" cy="'+PY(relu(x))+'" r="5" fill="#6b7280"/><circle cx="'+PX(x)+'" cy="'+PY(gelu(x))+'" r="5" fill="#e08a1e" stroke="#fff"/>';
+  s+='<text x="8" y="14" font-size="10" fill="#6b7280">gri: ReLU</text><text x="8" y="28" font-size="10" fill="#e08a1e">turuncu: GELU</text>';
+  document.getElementById('gsvg').innerHTML=s;
+  document.getElementById('rOut').textContent=relu(x).toFixed(3);
+  document.getElementById('gOut').textContent=gelu(x).toFixed(3);
+}
+document.getElementById('gx').oninput=renderG;
+renderG();
+
+
+// ---------- Softmax + sıcaklık ----------
+const P0=[['yedim',62],['yedi',14],['aldım',9],['sevdim',6],['içtim',5],['kokladım',4]];
+function tempProbs(T){const a=P0.map(([w,p])=>Math.pow(p/100,1/T));const s=a.reduce((x,y)=>x+y,0);return a.map(v=>v/s)}
+function renderSm(){
+  const T=parseFloat(document.getElementById('temp').value);
+  document.getElementById('tempv').textContent='T = '+T.toFixed(2);
+  const pr=tempProbs(T), mx=Math.max(...pr);
+  const sb=document.getElementById('smBars');sb.innerHTML='';
+  pr.forEach((p,i)=>{const b=document.createElement('div');b.className='bar'+(p===mx?' win':'');b.style.height=(p*130)+'px';
+    b.innerHTML='<span>%'+(p*100).toFixed(0)+'</span><i>'+P0[i][0]+'</i>';sb.appendChild(b)});
+}
+document.getElementById('temp').oninput=renderSm;
+document.getElementById('draw').onclick=e=>{e.stopPropagation();
+  const T=parseFloat(document.getElementById('temp').value),pr=tempProbs(T);let r=Math.random(),k=0;
+  for(;k<pr.length-1;k++){r-=pr[k];if(r<=0)break}
+  document.getElementById('drawRes').innerHTML='Kura sonucu: <b>'+P0[k][0]+'</b>'};
+renderSm();
+
+// ---------- Üretim döngüsü ----------
+const GEN=[{tok:'yedim',p:62},{tok:'.',p:48},{tok:'&lt;|endoftext|&gt;',p:35}];
+let gen=0,ctx=['Sabah','armut'];
+function renderGen(){
+  let h='<div class="ctxrow">'+ctx.map((t,i)=>'<span class="tok">'+t+'<br><span class="mini">sıra '+i+'</span></span>').join('')+'</div>';
+  if(gen<GEN.length){const g=GEN[gen];
+    h+='<div class="why"><b class="l">Tur '+(gen+1)+':</b> 1–6. adımlar çalışır. Son token ("'+ctx[ctx.length-1]+'") vektörü → 50.257 puan → softmax → en olası: <b>'+g.tok+'</b> (%'+g.p+'). Girdiye eklenir, bir sonraki tur başlar.</div>';
+  } else h+='<div class="good"><b>Bitti.</b> Model bitiş token\'ını seçti, üretim durdu. Sonuç: <b>"Sabah armut yedim."</b></div>';
+  document.getElementById('genOut').innerHTML=h;
+}
+document.getElementById('genStep').onclick=e=>{e.stopPropagation();if(gen<GEN.length){ctx.push(GEN[gen].tok);gen++;renderGen()}};
+document.getElementById('genReset').onclick=e=>{e.stopPropagation();gen=0;ctx=['Sabah','armut'];renderGen()};
+renderGen();
+
+
+// ---------- Gerçek sayılarla Q,K,V (4 boyutlu mini model) ----------
+const WQ=[[1,0,.5,0],[0,1,0,.5],[.5,0,1,0],[0,.5,0,1]];
+const WK=[[1,0,0,.5],[0,.5,1,0],[.5,1,0,0],[0,0,.5,1]];
+const WV=[[.5,0,1,0],[0,1,0,.5],[1,0,.5,0],[0,.5,0,1]];
+let XM=[[1,.5,0,-.5],[0,1,1,.5]];
+const WORDS=['Sabah','armut'];
+const mm=(A,B)=>A.map(r=>B[0].map((_,j)=>r.reduce((s,v,k)=>s+v*B[k][j],0)));
+const trn=A=>A[0].map((_,j)=>A.map(r=>r[j]));
+const f2=v=>(Math.round(v*100)/100).toFixed(2);
+function T(M,rows,cls){return '<table class="pt mt '+(cls||'')+'">'+M.map((r,i)=>'<tr>'+(rows?'<td class="rl">'+rows[i]+'</td>':'')+r.map(v=>'<td>'+(v===null?'—':f2(v))+'</td>').join('')+'</tr>').join('')+'</table>'}
+function cap(t){return '<div class="mcap">'+t+'</div>'}
+function eqRow(items){return '<div class="mrow">'+items.map(x=>x==='*'||x==='='||x==='/'?'<span class="op">'+(x==='*'?'×':x)+'</span>':'<div>'+x+'</div>').join('')+'</div>'}
+function renderQKVnum(){
+  const Q=mm(XM,WQ),K=mm(XM,WK),V=mm(XM,WV);
+  const S=mm(Q,trn(K)).map(r=>r.map(v=>v/2));
+  const Sm=S.map((r,i)=>r.map((v,j)=>j>i?null:v));
+  const Wt=Sm.map(r=>{const vis=r.filter(v=>v!==null).map(Math.exp);const sm=vis.reduce((a,b)=>a+b,0);let k=0;return r.map(v=>v===null?null:vis[k++]/sm)});
+  const O=Wt.map(r=>[0,1,2,3].map(c=>r.reduce((s,w,j)=>s+(w===null?0:w*V[j][c]),0)));
+  const row=XM[1],col=WQ.map(r=>r[0]);
+  const arith=row.map((v,k)=>f2(v)+'×'+f2(col[k])).join(' + ');
+  let h='';
+  h+='<b>1) Q, K, V = X × ağırlık</b>';
+  h+=eqRow([cap('X (girdi, 2×4)')+T(XM,WORDS),'*',cap('Wq 🔒 (4×4)')+T(WQ,null,'lock'),'=',cap('Q (2×4)')+T(Q,WORDS,'res')]);
+  h+=eqRow([cap('X')+T(XM,WORDS),'*',cap('Wk 🔒')+T(WK,null,'lock'),'=',cap('K (2×4)')+T(K,WORDS,'res')]);
+  h+=eqRow([cap('X')+T(XM,WORDS),'*',cap('Wv 🔒')+T(WV,null,'lock'),'=',cap('V (2×4)')+T(V,WORDS,'res')]);
+  h+='<div class="why"><b class="l">Bir hücre nasıl hesaplanıyor?</b> Q[armut][0] = armut satırı × Wq'+"'"+'nun 0. sütunu:<br><span class="mono">'+arith+' = <b>'+f2(Q[1][0])+'</b></span></div>';
+  h+='<b>2) Puan = Q × Kᵀ ÷ √4</b> (√4 = 2: boyut sayısının karekökü)';
+  h+=eqRow([cap('Puan (2×2)')+T(Sm,WORDS,'res'),cap('— = Sabah geleceği (armut) göremez, causal mask')]);
+  h+='<b>3) Softmax: her satırı yüzdeye çevir</b>';
+  h+=eqRow([cap('Yüzde (2×2)')+T(Wt.map(r=>r.map(v=>v===null?null:v*100)),WORDS,'res')]);
+  h+='<div style="font-size:.85rem;color:var(--muted)">Satırlar %100 eder. armut satırı: Sabah\'a %'+f2(Wt[1][0]*100)+', kendine %'+f2(Wt[1][1]*100)+' bakıyor.</div>';
+  h+='<b>4) Çıktı = Yüzde × V</b> (karıştırma: her sütunda yüzdelerle V\'lerin ağırlıklı toplamı)';
+  h+=eqRow([cap('Yüzde')+T(Wt.map(r=>r.map(v=>v===null?null:v)),WORDS),'*',cap('V')+T(V,WORDS),'=',cap('Çıktı (2×4)')+T(O,WORDS,'res')]);
+  h+='<div class="why"><b class="l">Sonuç:</b> armut\'un yeni vektörü = <b>'+f2(Wt[1][0])+' × V[Sabah] + '+f2(Wt[1][1])+' × V[armut]</b> = ['+O[1].map(f2).join(', ')+']. Bu vektör bir sonraki katmana X yerine girer.</div>';
+  h+='<div class="why"><b class="l">Karıştırma tek hücrede:</b> Çıktı[armut][0] = '+f2(Wt[1][0])+' × V[Sabah][0] + '+f2(Wt[1][1])+' × V[armut][0] = '+f2(Wt[1][0])+'×'+f2(V[0][0])+' + '+f2(Wt[1][1])+'×'+f2(V[1][0])+' = <b>'+f2(O[1][0])+'</b></div>';
+  document.getElementById('qkvCalc').innerHTML=h;
+}
+(function(){
+  const box=document.getElementById('xin');
+  let h='';
+  XM.forEach((r,i)=>{h+='<div style="text-align:center"><div class="mcap">'+WORDS[i]+' (X satırı)</div>'+r.map((v,j)=>'<input class="xi" type="number" step="0.1" value="'+v+'" data-i="'+i+'" data-j="'+j+'">').join(' ')+'</div>'});
+  box.innerHTML=h;
+  box.querySelectorAll('input').forEach(inp=>{inp.addEventListener('click',e=>e.stopPropagation());inp.oninput=()=>{const v=parseFloat(inp.value);XM[+inp.dataset.i][+inp.dataset.j]=isNaN(v)?0:v;renderQKVnum()}});
+  renderQKVnum();
+})();
+
+
+// ---------- Karıştırma (ağırlıklı ortalama) demosu ----------
+const VS=[0.5,0.25,1,-0.25], VA=[1,1.25,0.5,1];
+function renderMix(){
+  const p=parseInt(document.getElementById('mixP').value)/100;
+  document.getElementById('mixPv').textContent='Sabah %'+Math.round(p*100)+', armut %'+Math.round((1-p)*100);
+  let h='<div style="height:22px;border-radius:8px;border:1px solid #cbd5e1;margin:6px 0;background:linear-gradient(90deg,#f4c430 0%,#f4c430 '+(p*100)+'%,#2f6fb0 '+(p*100)+'%,#2f6fb0 100%);opacity:.9"></div>';
+  h+='<div class="mini" style="display:block;margin-bottom:6px">Sarı = Sabah\'ın payı, mavi = armut\'un payı</div>';
+  h+='<table class="pt"><tr><th>Boyut</th><th>V[Sabah]</th><th>V[armut]</th><th>Karışım = yüzde × V[Sabah] + yüzde × V[armut]</th></tr>';
+  for(let i=0;i<4;i++){const r=p*VS[i]+(1-p)*VA[i];
+    h+='<tr><td>'+i+'</td><td>'+VS[i].toFixed(2)+'</td><td>'+VA[i].toFixed(2)+'</td><td class="tot">'+p.toFixed(2)+'×'+VS[i].toFixed(2)+' + '+(1-p).toFixed(2)+'×'+VA[i].toFixed(2)+' = '+r.toFixed(2)+'</td></tr>'}
+  h+='</table><div style="font-size:.85rem;color:var(--muted)">%0 → sonuç tamamen armut\'un V\'si. %100 → tamamen Sabah\'ın V\'si. Arası ikisinin karışımı.</div>';
+  document.getElementById('mixOut').innerHTML=h;
+}
+document.getElementById('mixP').oninput=renderMix;renderMix();
+
+
+// ---------- FFN: kapı gerekliliği (x3 sonra x2) ----------
+function renderGate(){
+  const x=parseFloat(document.getElementById('gateX').value);
+  document.getElementById('gateXv').textContent='x = '+x;
+  const a=x*3,noGate=a*2,g=Math.max(0,a),withGate=g*2;
+  document.getElementById('gateOut').innerHTML='<table class="pt"><tr><th></th><th>×3</th><th>kapı (negatifi sıfırla)</th><th>×2</th><th>sonuç</th></tr>'+
+   '<tr><td>Kapısız</td><td>'+a+'</td><td>(yok)</td><td>'+noGate+'</td><td class="tot">'+noGate+' (hep ×6)</td></tr>'+
+   '<tr><td>Kapılı</td><td>'+a+'</td><td>'+g+'</td><td>'+withGate+'</td><td class="tot">'+withGate+'</td></tr></table>';
+}
+document.getElementById('gateX').oninput=renderGate;renderGate();
+
+// ---------- FFN: 4 → 8 → 4 mini örnek ----------
+const FN=['Sabah yemeği (kahvaltı)','Tatlı meyve','Canlı / doğal şey','Sadece zaman ifadesi','Yenilebilir şey','Soyut kavram','Ağaçta yetişen','Gün ışığı'];
+const FW1=[[4,1,0,0],[0,1,2,.5],[0,.5,.5,2],[2,-1.5,0,0],[0,2,.5,0],[-1,-1,-1,-1],[-.5,.8,.6,1.5],[1.5,0,0,.5]];
+const FB1=[-.9,-1.2,-1.0,-1.0,-.8,.5,-1.2,-.8];
+const FW2=[[.5,.5,0,0],[0,.3,.8,0],[0,0,0,.8],[.8,-.3,0,0],[0,.8,.2,0],[.2,.2,.2,.2],[0,.2,.2,.6],[.7,0,0,.2]];
+const FX=[[.9,0,.1,.2],[0,.9,.7,.8],[.18,.72,.58,.68]];
+const FD=['zaman','yiyecek','tatlılık','canlılık'];
+let ffI=2;
+function renderFFN(){
+  document.querySelectorAll('.ffw').forEach(b=>b.classList.toggle('sel',+b.dataset.f===ffI));
+  const x=FX[ffI];let out=[0,0,0,0];
+  let h='<div style="margin:8px 0"><b>Girdi x</b> = ['+x.map(f2).join(', ')+'] <span style="color:#6b7280">('+FD.join(', ')+')</span></div>';
+  h+='<div style="overflow-x:auto"><table class="pt"><tr><th>Dedektör (soru)</th><th>Kalıp (W1 sütunu)</th><th>Eşik</th><th>Ön puan</th><th>Kapı sonrası (GELU)</th><th>Açıksa yazdığı (W2 satırı)</th></tr>';
+  FN.forEach((n,j)=>{
+    const z=x.reduce((s,v,i)=>s+v*FW1[j][i],0)+FB1[j],a=gelu(z);
+    FW2[j].forEach((w,i)=>out[i]+=a*w);
+    const on=a>0.25, w=Math.max(0,Math.min(100,a/2.7*100));
+    h+='<tr style="'+(on?'background:#fff7e6;':'opacity:.65;')+'"><td style="'+(on?'font-weight:700':'')+'">'+n+(on?' 🟢':'')+'</td>'+
+       '<td>['+FW1[j].join(', ')+']</td><td>'+FB1[j]+'</td><td>'+f2(z)+'</td>'+
+       '<td class="tot">'+f2(a)+' <span class="pbar" style="width:'+w*0.5+'px;background:#e08a1e"></span></td>'+
+       '<td>['+FW2[j].join(', ')+']</td></tr>';
+  });
+  h+='</table></div>';
+  h+='<div class="why"><b class="l">Çıkış</b> = Σ (kapı sonrası puan × W2 satırı) = <span class="chip">['+out.map(f2).join(', ')+']</span> ('+FD.join(', ')+')<br>'+
+     '<span style="font-size:.88rem;color:var(--muted)">Şekil: x (1×4) × W1 (4×8) = (1×8) → kapı → (1×8) × W2 (8×4) = (1×4). 4 girdi, 8 boyuta genişledi, tekrar 4 çıktı. 🟢 = açık kalan dedektörler. Eşik: "bu kadar benzemezse açılma" demenin sayısal hali.</span></div>';
+  document.getElementById('ffnOut').innerHTML=h;
+}
+document.querySelectorAll('.ffw').forEach(b=>b.onclick=e=>{e.stopPropagation();ffI=+b.dataset.f;renderFFN()});
+renderFFN();
+
+// ---------- kart gezintisi ----------
+function setActive(i){
+  idx=i;
+  cards.forEach((c,k)=>{c.classList.toggle('active',k===i);c.classList.toggle('dim',i>=0&&k!==i)});
+  if(i>=0){
+    const c=cards[i];
+    document.getElementById('shape').textContent=c.dataset.shape;
+    document.getElementById('shapeNote').textContent=c.dataset.note;
+    c.classList.add('open');
+    c.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+}
+cards.forEach((c,i)=>c.addEventListener('click',e=>{
+  if(e.target.closest('.detail')||e.target.closest('button')||e.target.closest('input')||e.target.closest('.heads'))return;
+  if(c.classList.contains('open')&&idx===i){c.classList.remove('open');setActive(-1);return}
+  setActive(i)}));
+document.getElementById('next').onclick=()=>setActive(Math.min(idx+1,cards.length-1));
+document.getElementById('prev').onclick=()=>setActive(Math.max(idx-1,0));
+document.getElementById('toggleAll').onclick=()=>{
+  const any=cards.some(c=>c.classList.contains('open'));
+  cards.forEach(c=>c.classList.toggle('open',!any));
+  if(any)setActive(-1);
+};
+const playBtn=document.getElementById('play');
+playBtn.onclick=()=>{
+  if(timer){clearInterval(timer);timer=null;playBtn.textContent='▶ Adım adım oynat';return}
+  setActive(0);playBtn.textContent='⏸ Durdur';
+  timer=setInterval(()=>{
+    if(idx>=cards.length-1){clearInterval(timer);timer=null;playBtn.textContent='▶ Tekrar oynat';return}
+    setActive(idx+1);
+  },3500);
+};
+let blk=1;setInterval(()=>{blk=blk%12+1;document.getElementById('loopBadge').textContent='Blok '+blk+'/12'},900);
+
+// mini test
+const opts=[['512',false],['1.024',true],['2.048',false],['50.257',false]];
+const qb=document.getElementById('quizBtns');
+opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='alt';b.textContent=t;
+  b.onclick=()=>{document.getElementById('quizRes').innerHTML=ok?'<span class="ok">✅ Doğru! Konum tablosu 1.024 × 768 olduğu için.</span>':'<span class="no">❌ Tekrar dene. İpucu: Konum tablosunun satır sayısına bak.</span>'};
+  qb.appendChild(b)});
+
+</script>
+</body>
+</html>
