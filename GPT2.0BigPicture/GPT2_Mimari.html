@@ -292,40 +292,53 @@
       <h2>4. FFN (Feed-Forward Network / İleri Beslemeli Ağ) + GELU (Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi) <small>başlığa tıkla</small></h2>
       <div class="expand">
         <div class="ebar" style="width:90px">768</div> →
-        <div class="ebar" style="width:260px">3.072 (×4)</div> →
+        <div class="ebar" style="width:260px">3.072</div> →
         <div class="ebar" style="width:90px">768</div>
       </div>
-      <div class="why"><b class="l">💡 Sezgi (tek cümlede):</b> Attention'da kelimeler birbirinden bilgi aldı. FFN'de <b>her kelime kendi masasına döner ve o bilgiyi tek başına işler</b>: genişlet (3.072 soru sor) → kapıdan geçir (GELU) → özetle (768).</div>
+      <div class="mini" style="display:block;text-align:center;margin:2px 0 6px">768 sayı → <b>4 kat uzat</b> (768 × 4 = 3.072) → 3.072 sayı → tekrar <b>768'e kısalt</b></div>
+      <div class="why"><b class="l">💡 Sezgi (tek cümlede):</b> Attention'da kelimeler birbirinden bilgi aldı. FFN'de <b>her kelime kendi masasına döner ve o bilgiyi tek başına işler</b>. Bunun için kelimenin 768 sayılık listesini önce <b>4 kat uzatır</b> (3.072 sayı), uzun listede uygun olanları seçer, sonra yine 768'e kısaltır.</div>
       <div class="detail">
         <div class="why"><b class="l">1) Attention ile FFN'nin farkı (toplantı benzetmesi)</b><br>
           <b>Attention = toplantı.</b> Kelimeler birbirine bakar, bilgi alışverişi yapar ("armut" Sabah'tan bilgi aldı).<br>
           <b>FFN = toplantıdan sonra masa başı.</b> Her kelime kendi masasına döner ve aldığı bilgiyi <b>tek başına</b> işler. Bu aşamada kelimeler birbirine <b>karışmaz</b>: her token aynı işleme makinesinden ayrı ayrı geçer (aynı ağırlıklar, ayrı hesap).</div>
 
-        <h3>2) Genişlet → Kapıdan geçir → Özetle</h3>
-        <div class="why"><b class="l">Kontrol listesi benzetmesi.</b> 768 sayılık vektör, kelimenin "kısa özeti"dir. FFN bu özeti alıp 3.072 maddelik uzun bir <b>kontrol listesinden</b> geçirir:
-          <ol style="margin:6px 0">
-            <li><b>Genişletme (768 → 3.072):</b> Her madde bir <b>soru</b>: "Bu kelime kahvaltı bağlamında mı?", "tatlı bir meyve mi?", "canlı bir şey mi?"... 3.072 soru, her biri için bir <b>"ne kadar evet"</b> puanı. <span class="chip">2×768</span> × <span class="chip">768×3.072</span> = <span class="chip">2×3.072</span></li>
-            <li><b>GELU (kapı):</b> "Evet" diyen maddeler <b>açık kalır</b> (puan korunur), "hayır" diyenler <b>kapanır</b> (puan sıfıra yakın).</li>
-            <li><b>Özetleme (3.072 → 768):</b> Açık kalan her madde, kendi bilgisini 768'lik vektöre <b>ekler</b> ("bu bir kahvaltı yiyeceği" gibi). Sonuç tekrar küçük: <span class="chip">2×3.072</span> × <span class="chip">3.072×768</span> = <span class="chip">2×768</span></li>
-          </ol>
-          <b>Neden 4 kat (3.072)?</b> Soru sayısı, modelin "hafıza kapasitesi" gibidir. Ne kadar çok soru sorabilirse o kadar çok ayrıntıyı yakalar. 4 kat, tasarımcıların seçtiği bir orandır, doğa kanunu değil.</div>
-
-        <h3>3) İki matris neyi temsil ediyor?</h3>
+        <h3>2) Önce sayılar: 768, 3.072 ve "4 kat" nereden çıktı?</h3>
         <ul>
-          <li><b>W1 (768×3.072):</b> 3.072 sütunun her biri bir <b>dedektör</b>, yani 768 sayılık bir "kalıp". Girdi bu kalıba ne kadar benziyorsa (nokta çarpım) puan o kadar yüksek. "Bu madde ne zaman tetiklensin?" sorusunun cevabı.</li>
-          <li><b>W2 (3.072×768):</b> 3.072 satırın her biri "bu dedektör açıksa vektöre <b>ne ekleyeyim</b>" bilgisi.</li>
-          <li>Bir yorum olarak FFN, "anahtar–değer hafızası" gibi düşünülür: W1 = ne zaman tetiklensin, W2 = tetiklenince ne yazsın. (Dikkat: bu, attention'daki Q/K/V ile aynı şey <b>değil</b>.)</li>
-          <li>İkisi de <b>eğitimde öğrenilir</b>. Hangi dedektörün neyi yakalayacağına kimse karar vermez.</li>
+          <li><b>768:</b> Bir kelime, 768 sayılık bir liste (vektör). Bunu 1. ve 2. kartlarda gördük.</li>
+          <li><b>3.072:</b> FFN bu listeyi <b>4 kat uzatır</b>: 768 × 4 = 3.072 sayı.</li>
+          <li><b>"4"ü kim seçti?</b> Modeli tasarlayanlar. Doğa kanunu değil, deneylerde iyi çalışan bir oran. (İlk Transformer makalesinde de liste 512'den 2.048'e, yani yine 4 kat uzatılıyordu.)</li>
+          <li><b>Neden uzatıyoruz?</b> Küçük bir masada çok kâğıt serilmez. Masayı 4 kat büyütürsen daha çok şeyi yan yana koyup ayrı ayrı bakabilirsin. İşin bitince toplayıp çantaya (768) geri koyarsın.</li>
+          <li><b>3.072 sayının her biri bir "soru"nun cevabıdır:</b> "Kahvaltı bağlamı mı?", "tatlı bir meyve mi?", "canlı bir şey mi?"... Soru ne kadar çoksa yakalanan ayrıntı o kadar çok olur.</li>
         </ul>
 
-        <h3>4) Kapı (GELU) neden şart?</h3>
-        <div class="why">Kapı olmazsa iki matris art arda çarpılır ve <b>tek bir matrise indirgenir</b> (W1 × W2 = tek matris). 3.072'ye genişletmenin hiçbir anlamı kalmaz. Küçük bir sayı örneği: iki işlem düşün, "×3" sonra "×2".
+        <h3>3) W1 ve W2 ne? (Uzatan ve kısaltan iki tablo)</h3>
+        <div class="why"><b class="l">W = Weight (Ağırlık).</b> Modelin eğitimde öğrendiği <b>sabit sayılar tablosu</b>. FFN'de iki tane var: <b>W1</b> listeyi <b>uzatır</b> (768 → 3.072), <b>W2</b> listeyi <b>kısaltır</b> (3.072 → 768). "1" ve "2" sadece sıra numarası, başka bir anlamı yok.<br>
+          <b>Şekli okumak:</b> "768×3.072" yazısında soldaki sayı <b>girişin uzunluğu</b>, sağdaki sayı <b>çıkışın uzunluğu</b>. Yani W1 (768×3.072): 768 sayı girer, 3.072 sayı çıkar. W2 (3.072×768): 3.072 sayı girer, 768 sayı çıkar.</div>
+        <b>Küçük bir örnekle görelim:</b> 768 yerine <b>2 sayı</b>, 3.072 yerine <b>3 sayı</b>. Kutulardaki sayıları değiştir:
+        <div class="row">x1 = <input class="xi" type="number" step="1" value="3" id="m2a"> &nbsp; x2 = <input class="xi" type="number" step="1" value="1" id="m2b"></div>
+        <div id="m2out"></div>
+        <ul>
+          <li><b>Çarpma nasıl çalışıyor?</b> Çıkan her sayı, girişteki sayıların <b>tablodaki sayılarla çarpılıp toplanmasıdır</b> (yukarıda adım adım yazdım).</li>
+          <li><b>W1'in her sütunu bir "soru"dur</b> ("girişin bu karışımı ne kadar var?"). <b>W2'nin her satırı</b> "o soru evet'se çıkışa ne ekleyeyim" cevabıdır.</li>
+          <li>Tablolardaki sayıları <b>kimse yazmadı</b>, eğitimde öğrenildi. Çıkarımda değişmezler. 🔒</li>
+          <li>Bir yorum olarak FFN, "anahtar–değer hafızası" gibi düşünülür. (Dikkat: bu, attention'daki Q/K/V ile aynı şey <b>değil</b>.)</li>
+        </ul>
+
+        <h3>4) Üç adım: Uzat → Kapı → Kısalt</h3>
+        <ol>
+          <li><b>Uzat (W1 ile çarp):</b> 768 sayı → 3.072 sayı. Şekil: <span class="chip">2×768</span> × <span class="chip">768×3.072</span> = <span class="chip">2×3.072</span> (2 kelime var, o yüzden 2 satır).</li>
+          <li><b>Kapı (GELU):</b> 3.072 sayıdan "evet" diyenler <b>açık kalır</b> (sayı korunur), "hayır" diyenler <b>kapanır</b> (sıfıra yakın olur).</li>
+          <li><b>Kısalt (W2 ile çarp):</b> Açık kalanlar bilgilerini kısa listeye ekler. 3.072 sayı → 768 sayı. Şekil: <span class="chip">2×3.072</span> × <span class="chip">3.072×768</span> = <span class="chip">2×768</span></li>
+        </ol>
+
+        <h3>5) Kapı (GELU) neden şart?</h3>
+        <div class="why">Kapı olmazsa W1 ve W2 art arda çarpılır ve <b>tek bir tabloya indirgenir</b>. Uzatmanın hiçbir anlamı kalmaz. Küçük bir sayı örneği: iki işlem düşün, "×3" sonra "×2".
           <div class="row">Giriş x: <input type="range" id="gateX" min="-3" max="3" step="0.5" value="-1"> <span class="mono" id="gateXv"></span></div>
           <div id="gateOut"></div>
           Kapısız hâli hep "×6"dır, yani tek bir çarpmayla yapılabilir. Kapı ise "negatifse sustur" diyen, <b>tek bir çarpmayla yapılamayan</b> bir davranış ekler. "Doğrusal olmayan" (non-linear) tam olarak budur. (Burada kapı olarak basit "negatifi sıfırla" kullandım. GELU bunun pürüzsüz, yumuşak halidir.)</div>
 
-        <h3>5) Gerçek sayılarla mini örnek (4 → 8 → 4)</h3>
-        <div>768 yerine <b>4</b>, 3.072 yerine <b>8</b> boyut. Kelime vektörü 4 sayı: <b>[zaman, yiyecek, tatlılık, canlılık]</b>. 8 dedektör var. Bir kelime seç ve hangi dedektörlerin açıldığını gör.</div>
+        <h3>6) Gerçek sayılarla mini örnek (4 → 8 → 4)</h3>
+        <div>768 yerine <b>4</b>, 3.072 yerine <b>8</b> sayı. (Burada liste <b>2 kat</b> uzuyor. Gerçek GPT-2'de 4 kat.) Kelime vektörü 4 sayı: <b>[zaman, yiyecek, tatlılık, canlılık]</b>. 8 dedektör (soru) var. Bir kelime seç ve hangi dedektörlerin açıldığını gör.</div>
         <div class="row">
           <button class="alt ffw" data-f="0">Sabah</button>
           <button class="alt ffw" data-f="1">armut (tek başına)</button>
@@ -335,7 +348,7 @@
         <div id="ffnOut"></div>
         <div class="warn"><b class="l">⚠️ Uydurma değerler.</b> Dedektör isimleri ve sayılar anlatım için uydurulmuştur. Gerçek modelde 3.072 dedektörün çoğunun insanın koyabileceği tek bir adı yoktur, kavramlar birçok dedektöre yayılır ve hepsi eğitimle kendiliğinden oluşur. Gerçek GPT-2'de FFN çıkışı girişe eklenir (residual connection / artık bağlantı). Bu sayfa henüz onu anlatmıyor. GELU sonrası küçük negatif değerler (−0,17 gibi) normaldir, aşağıdaki GELU grafiğine bak.</div>
 
-        <div class="good"><b>🔒 FFN ağırlıkları da modelden gelir.</b> Genişletme matrisi (768×3.072) ve özetleme matrisi (3.072×768) eğitimde öğrenilmiş sabit sayılardır, çıkarımda değişmez. Her girdide yeniden hesaplanan tek şey <b>ara sonuçtur</b> (2×3.072).</div>
+        <div class="good"><b>🔒 FFN ağırlıkları da modelden gelir.</b> W1 (768×3.072) ve W2 (3.072×768) eğitimde öğrenilmiş sabit sayılardır, çıkarımda değişmez. Her girdide yeniden hesaplanan tek şey <b>ara sonuçtur</b> (2×3.072).</div>
         <hr class="d">
         <h3>📈 GELU nasıl davranıyor? Kaydırıp bak</h3>
         <div class="row">x değeri: <input type="range" id="gx" min="-4" max="4" step="0.05" value="1"> <span class="mono" id="gxv"></span></div>
@@ -658,6 +671,25 @@ function renderFFN(){
 }
 document.querySelectorAll('.ffw').forEach(b=>b.onclick=e=>{e.stopPropagation();ffI=+b.dataset.f;renderFFN()});
 renderFFN();
+
+
+// ---------- FFN: 2 -> 3 -> 2 mini tablo örneği ----------
+const M2W1=[[1,0,2],[0,1,1]], M2W2=[[1,0],[0,1],[1,1]];
+function renderM2(){
+  const a=parseFloat(document.getElementById('m2a').value)||0, b=parseFloat(document.getElementById('m2b').value)||0;
+  const x=[a,b], h=mm([x],M2W1)[0], o=mm([h],M2W2)[0];
+  let t='';
+  t+=eqRow([cap('x (1×2)')+T([x]),'*',cap('W1 🔒 (2×3)')+T(M2W1,null,'lock'),'=',cap('h (1×3)')+T([h],null,'res')]);
+  t+='<div class="why"><b class="l">Uzatma (2 → 3), W1 ile:</b><br>'+
+    [0,1,2].map(j=>'h'+(j+1)+' = x1×'+M2W1[0][j]+' + x2×'+M2W1[1][j]+' = '+f2(a)+'×'+M2W1[0][j]+' + '+f2(b)+'×'+M2W1[1][j]+' = <b>'+f2(h[j])+'</b>').join('<br>')+'</div>';
+  t+=eqRow([cap('h (1×3)')+T([h]),'*',cap('W2 🔒 (3×2)')+T(M2W2,null,'lock'),'=',cap('çıkış (1×2)')+T([o],null,'res')]);
+  t+='<div class="why"><b class="l">Kısaltma (3 → 2), W2 ile:</b><br>'+
+    [0,1].map(j=>'çıkış'+(j+1)+' = '+[0,1,2].map(k=>'h'+(k+1)+'×'+M2W2[k][j]).join(' + ')+' = '+[0,1,2].map(k=>f2(h[k])+'×'+M2W2[k][j]).join(' + ')+' = <b>'+f2(o[j])+'</b>').join('<br>')+'</div>';
+  t+='<div style="font-size:.88rem;color:var(--muted)">2 sayı girdi, ara listede 3 sayı oldu (uzadı), sonunda yine 2 sayı (kısaldı). GPT-2\'de aynı iş 768 → 3.072 → 768. (Bu örnekte GELU kapısı yok, onu 6. adımda ekliyoruz.)</div>';
+  document.getElementById('m2out').innerHTML=t;
+}
+['m2a','m2b'].forEach(id=>{const e=document.getElementById(id);e.addEventListener('click',ev=>ev.stopPropagation());e.oninput=renderM2});
+renderM2();
 
 // ---------- kart gezintisi ----------
 function setActive(i){
