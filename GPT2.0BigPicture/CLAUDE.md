@@ -67,9 +67,29 @@ GPT-2'yi (Generative Pre-trained Transformer 2 / Üretken Önceden Eğitilmiş D
 - Cihazdaki kabuk (`device_bash`) bu klasörleri bağlayamayabiliyor. Dosya silme/taşıma gerekirse kullanıcıya bırak.
 - Bu klasör `mestal.github.io` deposunun **alt klasörü**, `.git` bir üst klasörde. **Kullanıcı istemedikçe commit atma ve push etme.**
 
+## İki çalışma biçimi ve senkron kuralı
+
+Bu klasörde iki şekilde çalışılır. **Her oturumda hangisinde olduğunu belirle** ve ona göre davran:
+
+**A) Bilgisayar modu (cihaz köprüsü açık).** Yukarıdaki "Dosya yazma ve teslim kuralları" geçerli (CRLF, `device_*` araçları).
+
+**B) GitHub modu (bilgisayar kapalı, telefon vb.).**
+- Depo: `mestal/mestal.github.io`, ana dal **`master`**, klasör: `GPT2.0BigPicture/`.
+- `add_repo` (push erişimiyle) ile bağla. Claude GitHub uygulaması kullanıcının hesabına kuruldu, push çalışıyor. Erişim reddedilirse kullanıcıya söyle: https://github.com/apps/claude/installations/select_target
+- Tek bir sığ klon al: `git clone --depth 1 https://github.com/mestal/mestal.github.io /home/claude/mestal.github.io` (uzun sürebilir, komut zaman aşımını ~10 dk yap, paralel klon açma).
+- Depodaki dosyalar **LF** satır sonuyla. Bu modda **LF yaz**, CRLF'ye çevirme (CRLF kuralı sadece Windows'taki yerel klasör içindir).
+- Commit ve push'u kullanıcı istediyse yap. Push için `git -c push.negotiate=true push origin master`. Mesaj Türkçe, sonuna oturumun istediği `Co-Authored-By` ve oturum bağlantısı satırları eklenir.
+- Push'tan ~45 sn sonra sitede değişikliği doğrula (WebFetch ile).
+
+**Senkron kuralı (iki yönlü risk: bilgisayar ile GitHub ayrışabilir):**
+1. **Bilgisayar modunda, değişiklik yapmadan önce:** GitHub'dan temiz bir sığ klon al, yerel dosyaları `device_stage_files` ile al ve **satır sonlarını normalize ederek** karşılaştır. Fark varsa **değişiklik yapma**, kullanıcıya hangi dosyaların farklı olduğunu söyle ve önce bilgisayarda `git pull` (ya da commit edilmemiş işi commit/stash) yapmasını öner.
+2. **GitHub modunda, bitirince:** Yanıtın sonunda kullanıcıyı uyar: "Bilgisayarda çalışmadan önce `git pull` yapın." Bilgisayarda push edilmemiş işi olup olmadığını bilemeyiz, bunu da hatırlat.
+3. **Asla `git push --force` kullanma.** Push reddedilirse `git fetch` + rebase/merge ile çöz. Çakışma çıkarsa kullanıcıya sor.
+4. Çakışma çözümünden sonra `<<<<<<<` işaretleri kalmadığını ve sayfanın tarayıcıda açıldığını doğrula.
+
 ## Yayın notu
 
-Klasör `mestal.github.io` deposunun içinde (GitHub Pages sitesi olması muhtemel). Push edilirse sayfalar ve bu dosya herkese açık olabilir. Bu yüzden:
+Klasör `mestal/mestal.github.io` deposunun içinde. Depo **herkese açık** ve site GitHub Pages ile yayında (doğrulandı: `https://mestal.github.io/GPT2.0BigPicture/abc.html` açıldı). Push edilen her şey (sayfalar ve bu dosya dahil) herkese açık olur ve yaklaşık 1 dakika içinde sitede görünür. Bu yüzden:
 
 - Sayfalar arası bağlantılar **göreli** kalsın (`GPT2_Egitim.html` gibi), mutlak dosya yolu ya da `file:///` kullanma.
 - Sayfalara ve bu dosyaya kişisel/gizli bilgi, parola, özel yol bilgisi koyma.
@@ -87,9 +107,9 @@ Klasör `mestal.github.io` deposunun içinde (GitHub Pages sitesi olması muhtem
 ## Her değişikliğin sonunda kontrol listesi
 
 1. Sayfayı tarayıcıda aç, konsol hatası ve düğme/kaydırıcı testi.
-2. Dosyayı yaz (CRLF), ~5 sn bekle, commit et, `device_list_dir` ile boyutu doğrula.
+2. **Bilgisayar modu:** dosyayı yaz (CRLF), ~5 sn bekle, commit et, `device_list_dir` ile boyutu doğrula. **GitHub modu:** dosyayı LF yaz, commit + push (istendiyse), sitede doğrula.
 3. Yeni kart, dosya ya da kural eklendiyse **bu dosyadaki** "Dosyalar" tablosunu ve ilgili bölümleri güncelle.
-4. Yanıtın sonunda Türkçe commit mesajını ver.
+4. Yanıtın sonunda Türkçe commit mesajını ver. GitHub modunda ayrıca "bilgisayarda `git pull` yapın" hatırlatması ekle.
 
 ## Fikir listesi (kararlaştırılmadı, kullanıcı onayı gerekir)
 
