@@ -181,14 +181,54 @@
 
       <hr class="d">
       <h3>🧪 Minik örnek: 2 ağırlıklı ağ, zincir kuralını izle</h3>
-      <div>Ağ: <span class="chip">a = w1 · x</span> → <span class="chip">y = w2 · a</span>. Girdi x = 2, hedef t = 3. Loss = (y − t)². Başlangıç w1 = 0,5, w2 = 1,0. LR = 0,05.</div>
+      <div class="why"><b class="l">Amaç (tek cümle):</b> Ağ x = 2 girince <b>3</b> söylesin istiyoruz. Başta yanlış söylüyor. Hangi ağırlığı hangi yöne, ne kadar oynatırsak doğruya yaklaşırız? Bunu türevle buluyoruz.</div>
+
+      <h3>1) Ağ ne yapıyor?</h3>
+      <ul>
+        <li><b>Girdi:</b> x = 2. Hedef (cevap): t = 3.</li>
+        <li><b>İki ağırlık = iki ayar düğmesi:</b> w1 ve w2. Başta w1 = 0,5 ve w2 = 1,0. (Gerçek modelde bu sayılar rastgele başlar.)</li>
+        <li><b>İleri geçiş (tahmin yapmak):</b> Önce <span class="chip">a = w1 × x</span>, sonra <span class="chip">y = w2 × a</span>. Yani x iki kere çarpılıp tahmine dönüşüyor. y bizim tahminimiz.</li>
+        <li><b>Loss (hata):</b> <span class="chip">(y − t)²</span>. Tahmin hedeften ne kadar uzaksa o kadar büyük. Tam 3 bulursa 0.</li>
+        <li><b>LR (öğrenme hızı) = 0,05:</b> Her adımda düğmeyi ne kadar oynatacağımızı küçültür.</li>
+      </ul>
+      <div class="why"><b class="l">Başlangıç hesabı:</b> a = 0,5 × 2 = 1 → y = 1,0 × 1 = 1 → hedef 3, tahmin 1. Hata: (1 − 3)² = <b>4</b>. Tahmin çok küçük, ağırlıkları <b>artırmamız</b> gerek. Ama <b>hangisini ne kadar?</b></div>
+
+      <h3>2) "Türev" burada ne demek?</h3>
+      <div>Türev bir <b>"ayar düğmesi hassasiyeti"</b>dir. "w2'yi minicik artırırsam loss ne kadar değişir?" sorusunun cevabı. Örneğin w2'yi 0,01 artırırsak y = 1,01 olur, loss 3,9601'e düşer. Yani 0,01'lik oynamaya karşılık loss yaklaşık 0,04 azaldı. Oran = −4. İşte w2'nin türevi: <b>−4</b>.</div>
+      <ul>
+        <li><b>Eksi işaret:</b> "artırırsan loss azalır." Doğru yön: artır.</li>
+        <li><b>Büyük sayı:</b> Düğme çok hassas, az oynatman yetiyor.</li>
+        <li>Pozitif türev olsaydı "artırırsan loss de artar" derdi, ağırlığı azaltırdık.</li>
+      </ul>
+
+      <h3>3) Zincir kuralı: neden geriden gidiyoruz?</h3>
+      <div>w2 loss'a <b>doğrudan</b> bağlı. Ama w1 <b>dolaylı</b>: önce a'yı, a da y'yi, y de loss'u etkiliyor. Zincir kuralı der ki: <b>zincirdeki her halkanın oranını çarp.</b> Dişli çarklar gibi: ilk çark biraz dönünce son çark, aradaki oranların çarpımı kadar döner.</div>
+      <ul>
+        <li><b>① Loss y'yi ne kadar etkiliyor?</b> dLoss/dy = 2(y − t) = 2(1 − 3) = <b>−4</b></li>
+        <li><b>② w2 için:</b> w2, y'yi a kadar etkiler (y = w2 × a, a = 1). Yani dLoss/dw2 = ① × a = −4 × 1 = <b>−4</b></li>
+        <li><b>③ Zincirde bir geri adım:</b> a, y'yi w2 kadar etkiler (w2 = 1). Yani dLoss/da = ① × w2 = −4 × 1 = <b>−4</b></li>
+        <li><b>④ w1 için:</b> w1, a'yı x kadar etkiler (x = 2). Yani dLoss/dw1 = ③ × x = −4 × 2 = <b>−8</b>. Tam zincir: <b>① × w2 × x</b>.</li>
+      </ul>
+      <div class="why"><b class="l">Sezgi:</b> w1'in türevi daha büyük (−8). Çünkü w1 önce x ile (×2) büyütülüyor, sonra w2 ile y'ye taşınıyor. Etkisi zincir boyunca çoğalıyor. <b>Hangi ağırlık loss'u daha çok etkiliyorsa onu daha çok oynatırız.</b></div>
+
+      <h3>4) Güncelleme (backprop değil, optimizer işi)</h3>
+      <ul>
+        <li><span class="chip">w_yeni = w_eski − LR × türev</span></li>
+        <li>w2: 1,0 − 0,05 × (−4) = 1,0 + 0,2 = <b>1,2</b></li>
+        <li>w1: 0,5 − 0,05 × (−8) = 0,5 + 0,4 = <b>0,9</b></li>
+        <li><b>Neden eksi?</b> Türev negatifse "artırırsan loss azalır" demek. Eksi × eksi = artı, ağırlık artar. Türev pozitif olsaydı ağırlık azalırdı. Her zaman <b>loss'un azaldığı yöne</b> gidiyoruz.</li>
+        <li><b>Kontrol:</b> a = 0,9 × 2 = 1,8 → y = 1,2 × 1,8 = 2,16 → loss = <b>0,7056</b>. 4'ten 0,7'ye düştü. Tek adımda büyük ilerleme.</li>
+      </ul>
+
+      <h3>5) Şimdi kendin dene</h3>
+      <div>Butona bas, her adımda yukarıdaki dört hesabın <b>yeni sayılarla</b> tekrarlandığını izle. Loss'un küçülmesine, tahminin 3'e yaklaşmasına ve türevlerin küçülmesine dikkat et. (Hedefe yaklaştıkça eğim azalır, adımlar kendiliğinden küçülür.)</div>
       <div class="row">
         <button id="bpStep">1 adım at</button>
         <button class="alt" id="bpTen">10 adım at</button>
         <button class="alt" id="bpReset">Sıfırla</button>
       </div>
       <div id="bpOut"></div>
-      <div class="warn"><b class="l">⚠️</b> Burada 2 ağırlık var. GPT-2 small'da yaklaşık 124 milyon var. Mantık aynı.</div>
+      <div class="warn"><b class="l">⚠️</b> Burada 2 ağırlık ve tek bir sayı çarpımı var. GPT-2 small'da yaklaşık 124 milyon ağırlık ve onlarca katman var. Mantık aynı: <b>sondan başa her halkanın oranını çarp, her ağırlığın türevini bul, loss'u azaltan yöne küçük adım at.</b> Ayrıca burada işlemler basit çarpma; gerçekte matris çarpımı, GELU, softmax gibi halkalar da zincire girer ama her birinin kendi yerel türevi vardır.</div>
     </div>
   </section>
   <div class="arrow">↓</div>
@@ -359,16 +399,21 @@ function bpStep(){
   bpRender(c);
 }
 function bpRender(last){
-  const c=bpCompute();
+  const c=bpCompute(), f=v=>v.toFixed(3);
   let h='<table class="pt"><tr><th>Adım</th><th>w1</th><th>w2</th><th>y (tahmin)</th><th>Loss</th></tr>';
-  h+='<tr><td>şimdi</td><td>'+bp.w1.toFixed(3)+'</td><td>'+bp.w2.toFixed(3)+'</td><td>'+c.y.toFixed(3)+'</td><td class="tot">'+c.L.toFixed(4)+'</td></tr></table>';
-  h+='<div class="why"><b class="l">İleri:</b> a = '+bp.w1.toFixed(3)+' × 2 = '+c.a.toFixed(3)+' → y = '+bp.w2.toFixed(3)+' × '+c.a.toFixed(3)+' = '+c.y.toFixed(3)+'<br>';
-  h+='<b class="l">Geri (sondan başa):</b><br>'+
-     '① dLoss/dy = 2(y − t) = '+c.dy.toFixed(3)+'<br>'+
-     '② dLoss/dw2 = ① × a = '+c.g2.toFixed(3)+'<br>'+
-     '③ dLoss/da = ① × w2 = '+c.da.toFixed(3)+'<br>'+
-     '④ dLoss/dw1 = ③ × x = '+c.g1.toFixed(3)+' <span style="color:#6b7280">(zincir: ① × w2 × x)</span><br>'+
-     '<b class="l">Güncelle:</b> w = w − 0,05 × türev. Türev negatif → ağırlık artar → tahmin hedefe (3) yaklaşır.</div>';
+  h+='<tr><td>'+bpHist.length+'. adım sonrası</td><td>'+f(bp.w1)+'</td><td>'+f(bp.w2)+'</td><td>'+f(c.y)+'</td><td class="tot">'+c.L.toFixed(4)+'</td></tr></table>';
+  h+='<div class="why"><b class="l">İleri (tahmin):</b><br>a = w1 × x = '+f(bp.w1)+' × 2 = <b>'+f(c.a)+'</b><br>y = w2 × a = '+f(bp.w2)+' × '+f(c.a)+' = <b>'+f(c.y)+'</b> (hedef 3, fark '+f(c.y-bp.t)+')<br>Loss = ('+f(c.y)+' − 3)² = <b>'+f(c.L)+'</b></div>';
+  h+='<div class="why"><b class="l">Geri (sondan başa):</b><br>'+
+     '① Loss y\'ye göre: 2 × ('+f(c.y)+' − 3) = <b>'+f(c.dy)+'</b><br>'+
+     '② w2 için: ① × a = '+f(c.dy)+' × '+f(c.a)+' = <b>'+f(c.g2)+'</b><br>'+
+     '③ a için: ① × w2 = '+f(c.dy)+' × '+f(bp.w2)+' = <b>'+f(c.da)+'</b><br>'+
+     '④ w1 için: ③ × x = '+f(c.da)+' × 2 = <b>'+f(c.g1)+'</b> <span style="color:#6b7280">(zincir: ① × w2 × x)</span></div>';
+  const n2=bp.w2-bp.lr*c.g2, n1=bp.w1-bp.lr*c.g1;
+  h+='<div class="why"><b class="l">Bir sonraki adımda güncelleme olacak:</b><br>'+
+     'w2: '+f(bp.w2)+' − 0,05 × ('+f(c.g2)+') = <b>'+f(n2)+'</b><br>'+
+     'w1: '+f(bp.w1)+' − 0,05 × ('+f(c.g1)+') = <b>'+f(n1)+'</b><br>'+
+     (Math.abs(c.dy)<0.05?'Tahmin hedefe çok yakın, türevler küçüldü, ağırlıklar neredeyse hiç oynamıyor.':
+      (c.dy<0?'Türevler negatif: artırırsak loss azalır, bu yüzden ağırlıklar artıyor.':'Türevler pozitif: azaltırsak loss azalır, bu yüzden ağırlıklar azalıyor.'))+'</div>';
   if(bpHist.length) h+='<div style="font-size:.85rem;color:#6b7280">Loss geçmişi: '+bpHist.map(v=>v.toFixed(2)).join(' → ')+'</div>';
   document.getElementById('bpOut').innerHTML=h;
 }
