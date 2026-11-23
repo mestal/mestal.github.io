@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kids Coding &amp; Logic Puzzles – Learn coding with a robot</title>
+<meta name="description" content="Learn coding basics &amp; logic! Guide the robot to collect batteries in fun puzzles. Drag-and-drop visual coding for kids ages 4+, no reading needed.">
+<meta name="theme-color" content="#0e8fb3">
+<meta property="og:title" content="Kids Coding &amp; Logic Puzzles">
+<meta property="og:description" content="Guide the robot. Collect the batteries. Learn to code!">
+<meta property="og:image" content="assets/img/og.jpg">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/img/icon-192.png">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav id="nav"><div class="wrap">
+  <a class="logo" href="#top"><img src="assets/img/icon-192.png" alt="" width="40" height="40"><span>Kids Coding</span></a>
+  <div class="links">
+    <a href="#features" data-i18n="n1">Features</a>
+    <a href="#demo" data-i18n="n2">Try it</a>
+    <a href="#how" data-i18n="n3">How to play</a>
+    <a href="#levels" data-i18n="n4">Levels</a>
+    <a href="#video" data-i18n="n5">Video</a>
+  </div>
+  <select class="lang" id="lang" aria-label="Language"></select>
+  <a class="btn sm" data-play href="#" target="_blank" rel="noopener" data-i18n="n6">Play now</a>
+</div></nav>
+
+<header class="hero" id="top"><div class="wrap">
+  <div>
+    <span class="pill" data-i18n="h0">Ages 4+ · No reading needed</span>
+    <h1><span class="a" data-i18n="h1">Guide the robot.</span><span class="b" data-i18n="h2">Collect the batteries.</span><span class="c" data-i18n="h3">Learn to code!</span></h1>
+    <p class="lead" data-i18n="h4"></p>
+    <div class="cta">
+      <a class="btn" data-play href="#" target="_blank" rel="noopener">▶ Google Play</a>
+      <a class="btn ghost" href="#demo" data-i18n="h5">Try it now</a>
+    </div>
+    <div class="tags"><span data-i18n="t1">Free to play</span><span data-i18n="t2">No reading required</span><span>🧩 STEM</span></div>
+  </div>
+  <div style="position:relative">
+    <span class="float" style="top:4%;left:0">🔋</span><span class="float" style="top:48%;right:-2%;animation-delay:-2s">⚙️</span><span class="float" style="bottom:4%;left:6%;animation-delay:-3s">⭐</span>
+    <div class="phone"><video src="assets/video/promo.mp4" poster="assets/img/hero-poster.jpg" autoplay muted loop playsinline preload="metadata"></video></div>
+  </div>
+</div></header>
+
+<div class="stats rv"><div class="wrap">
+  <div class="stat"><b>96</b><span data-i18n="s1">stages</span></div>
+  <div class="stat"><b>6</b><span data-i18n="s2">levels</span></div>
+  <div class="stat"><b>49</b><span data-i18n="s3">languages</span></div>
+</div></div>
+
+<section id="features"><div class="wrap">
+  <div class="sh rv"><h2 data-i18n="f0">Play. Think. Code.</h2></div>
+  <div class="grid3">
+    <div class="card rv"><i>🧩</i><h3 data-i18n="f1"></h3><p data-i18n="f1p"></p></div>
+    <div class="card rv"><i>🧠</i><h3 data-i18n="f2"></h3><p data-i18n="f2p"></p></div>
+    <div class="card rv"><i>🔁</i><h3 data-i18n="f3"></h3><p data-i18n="f3p"></p></div>
+    <div class="card rv"><i>⭐</i><h3 data-i18n="f4"></h3><p data-i18n="f4p"></p></div>
+    <div class="card rv"><i>📈</i><h3 data-i18n="f5"></h3><p data-i18n="f5p"></p></div>
+    <div class="card rv"><i>👨‍👩‍👧</i><h3 data-i18n="f6"></h3><p data-i18n="f6p"></p></div>
+  </div>
+</div></section>
+
+<section id="demo"><div class="wrap">
+  <div class="sh rv"><h2 data-i18n="d0">Try it yourself</h2><p data-i18n="d0p"></p></div>
+  <div class="demo rv">
+    <div class="dleft">
+      <div class="lvlbar"><b><span data-i18n="d11">Level</span> <span id="lvn">1</span>/4</b><div class="dots" id="dots"></div></div>
+      <div class="hint" id="hint"></div>
+      <div class="board-wrap"><div class="board" id="board"></div></div>
+    </div>
+    <div class="dright">
+      <div class="listrow" id="rowMain"><span class="lico">🏠</span><div class="slots" id="slotsMain"></div></div>
+      <div class="listrow" id="rowStar" style="display:none"><span class="lico">⭐</span><div class="slots" id="slotsStar"></div></div>
+      <div class="pal" id="pal"></div>
+      <div class="ctl">
+        <button class="btn go" id="bPlay">▶ <span data-i18n="d3">Play</span></button>
+        <button class="btn ghost" id="bClear">🗑 <span data-i18n="d4">Clear</span></button>
+        <button class="btn ghost" id="bReset">↺ <span data-i18n="d7">Restart</span></button>
+      </div>
+      <div class="msg" id="msg"></div>
+      <button class="btn" id="bNext" style="display:none"><span data-i18n="d6">Next level</span> →</button>
+    </div>
+  </div>
+</div></section>
+
+<section id="how"><div class="wrap">
+  <div class="sh rv"><h2 data-i18n="w0">How to play</h2></div>
+  <div class="steps">
+    <div class="step rv"><div class="big">🧩</div><div class="n">1</div><h3 data-i18n="w1"></h3><p data-i18n="w1p"></p></div>
+    <div class="step rv"><div class="big">▶️</div><div class="n">2</div><h3 data-i18n="w2"></h3><p data-i18n="w2p"></p></div>
+    <div class="step rv"><div class="big">🔋</div><div class="n">3</div><h3 data-i18n="w3"></h3><p data-i18n="w3p"></p></div>
+  </div>
+  <div class="sh rv" style="margin-top:70px"><h2 data-i18n="p0">Peek inside</h2></div>
+  <div class="shots rv">
+    <img src="assets/img/shot-1.webp" alt="" loading="lazy">
+    <img src="assets/img/shot-2.webp" alt="" loading="lazy">
+    <img src="assets/img/shot-3.webp" alt="" loading="lazy">
+    <img src="assets/img/shot-4.webp" alt="" loading="lazy">
+  </div>
+</div></section>
+
+<section id="levels"><div class="wrap">
+  <div class="sh rv"><h2 data-i18n="l0">Grows with your child</h2><p data-i18n="l0p"></p></div>
+  <div class="lv">
+    <div class="lvc rv c1"><span>1–3</span><h3 data-i18n="l1"></h3><p data-i18n="l1p"></p></div>
+    <div class="lvc rv c2"><span>4</span><h3 data-i18n="l2"></h3><p data-i18n="l2p"></p></div>
+    <div class="lvc rv c3"><span>5</span><h3 data-i18n="l3"></h3><p data-i18n="l3p"></p></div>
+    <div class="lvc rv c4"><span>6</span><h3 data-i18n="l4"></h3><p data-i18n="l4p"></p></div>
+  </div>
+  <img class="wide rv" src="assets/img/wide-1.webp" alt="" loading="lazy">
+</div></section>
+
+<section id="video"><div class="wrap">
+  <div class="sh rv"><h2 data-i18n="v0">See it in action</h2></div>
+  <div class="vid rv"><video src="assets/video/promo.mp4" poster="assets/img/hero-poster.jpg" controls playsinline preload="none"></video></div>
+</div></section>
+
+<section class="final"><div class="wrap rv">
+  <img src="assets/img/icon-192.png" alt="" width="96" height="96" style="margin:0 auto 18px;border-radius:24px">
+  <h2 data-i18n="z0">Ready to code with the robot?</h2><p data-i18n="z0p"></p>
+  <div class="cta"><a class="btn" data-play href="#" target="_blank" rel="noopener">▶ Google Play</a></div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>© Programming for Kids · mestal</p>
+</div></footer>
+
+<canvas id="cf"></canvas>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
