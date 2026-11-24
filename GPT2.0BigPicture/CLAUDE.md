@@ -13,10 +13,20 @@ GPT-2'yi (Generative Pre-trained Transformer 2 / Üretken Önceden Eğitilmiş D
 | Dosya | İçerik |
 |---|---|
 | `GPT2_Mimari.html` | **Çıkarım (Inference)** sayfası. Model eğitilmiş ve ağırlıklar sabit. Kartlar: 1 Tokenizer, 2 Embedding + Konum (768 sayı ne demek, konum vektörü sezgisi), 3 MHA (Q/K/V, gerçek sayılı mini örnek, "karıştırma" açıklaması), 4 FFN (toplantı/masa başı sezgisi, genişlet-kapı-özetle, W1/W2 anlamı, "kapı neden şart" demosu, 4→8→4 sayılı örnek) + GELU, 5 LM Head, 6 Softmax (sıcaklık), 7 Üretim döngüsü (autoregressive). |
-| `GPT2_Egitim.html` | **Eğitim (Training)** sayfası. Kartlar: 1 Büyük resim, 2 Loss, 3 Backpropagation, 4 Optimizer/LR, 5 Sayılar nereden geliyor, 6 Aktivasyon türevi (GELU/ReLU), 7 Pratik notlar. |
+| `GPT2_Egitim.html` | **Eğitim (Training)** sayfası. Kartlar: 1 Büyük resim, 2 Loss, 3 Backpropagation (2 ağırlıklı mini örnek), 4 **Geri yolculuk** (türevin GPT-2 içinde durak durak akışı, kısayol/kaybolan türev deneyi), 5 Optimizer/LR, 6 Sayılar nereden geliyor, 7 Aktivasyon türevi (GELU/ReLU), 8 Pratik notlar. |
 | `CLAUDE.md` | Bu dosya. |
 
 İki sayfa en üstteki bağlantı çubuğuyla ve metin içi bağlantılarla (`GPT2_Egitim.html#sayilar`, `#aktivasyon`) birbirine bağlıdır. Yeni bir sayfa eklenirse iki sayfanın da bağlantı çubuğu güncellenmelidir.
+
+## Kod paneli (sağ taraf)
+
+Her iki sayfada kartların başlığının altında `💻 Kod:` düğmeleri (`button.codebtn[data-code=anahtar]`) vardır. Tıklayınca sağda koyu bir **kod paneli** açılır (dar ekranda tam ekran). Kodlar sayfa içindeki `CODE` nesnesinde durur (tek dosya kuralı bozulmaz; iki sayfada ayrı kopya).
+
+- **Kaynak:** `D:\repos\chatgpt-from-scratch-tr` (GitHub: `celiktepesahin/chatgpt-from-scratch-tr`, **Apache-2.0**, tek not defteri `FULL-SERIES.ipynb`). Kod buradan **kısaltılarak** alındı. Panel altında kaynak, lisans ve "kısaltıldı, açıklama eklendi" notu görünür; bu notu kaldırma.
+- **Açıklama kuralı:** Özgün not defteri yorumları `#` ile gri kalır. Bizim eklediğimiz açıklamalar **`#▶`** ile başlar (sarı görünür). Satır sonundaki `#▶` açıklamaları panelde kodun üst satırına alınır.
+- Yeni kod parçası eklerken: not defterinden gerçek hücreyi al, çalışmayan/uydurma kod yazma, sayısal çıktıları defterdeki gerçek çıktılardan al.
+- Çıkarım sayfası anahtarları: tok, emb, qkv, mha, weights, ffn, blk, gpt, gen. Eğitim sayfası: loop, loss, manual, blk, shortcut, emb, gelu, gpt.
+
 
 **Kural: Her sayfadan tek kopya olur.** `_v2`, `_yeni` gibi yan dosyalar açma. Mevcut dosyayı güncelle.
 

@@ -96,6 +96,57 @@
   .farr{color:#94a3b8;font-size:1.2rem}
   .ctxrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
   .ctxrow .tok{text-align:center;font-size:.9rem}
+
+  /* ---- Kod paneli (sağ taraf) ---- */
+  :root{--cpw:min(48vw,640px)}
+  body.cp-open{padding-right:var(--cpw);transition:padding .2s}
+  #cp{position:fixed;top:0;right:0;bottom:0;width:var(--cpw);background:#0f172a;color:#e2e8f0;z-index:50;display:none;flex-direction:column;box-shadow:-6px 0 22px #0006}
+  body.cp-open #cp{display:flex}
+  .cp-h{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#020617;border-bottom:1px solid #1e293b}
+  .cp-h select{flex:1;min-width:0;font:inherit;font-size:.85rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:6px}
+  .cp-h button{padding:6px 11px;font-size:.85rem;border-radius:8px}
+  .cp-h button.alt{background:#1e293b;color:#e2e8f0;border-color:#334155}
+  .cp-b{overflow:auto;padding:12px 14px 40px;flex:1;-webkit-overflow-scrolling:touch}
+  .cp-b h3{margin:2px 0 6px;color:#fcd34d;font-size:1.05rem}
+  .cp-b .cpi{font-size:.92rem;line-height:1.5;margin-bottom:8px}
+  .cp-b .cpw{background:#1e293b;border-left:4px solid #38bdf8;border-radius:8px;padding:8px 10px;font-size:.88rem;margin:8px 0}
+  .cp-b code{background:#1e293b;color:#fde68a;border-radius:4px;padding:0 4px;font-size:.85em}
+  .cp-leg{font-size:.76rem;color:#94a3b8;margin:8px 0 4px}
+  .cp-leg i{font-style:normal;padding:0 5px;border-radius:4px;background:#1e293b}
+  #cpCode{margin:0;background:#020617;border:1px solid #1e293b;border-radius:10px;padding:8px 0;overflow-x:auto;font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:.78rem;line-height:1.55;counter-reset:ln}
+  #cpCode .cl{display:block;white-space:pre-wrap;word-break:break-word;padding:0 12px 0 calc(2.6em + 12px);text-indent:calc(-2.6em - 12px);counter-increment:ln;min-height:1.55em}
+  #cpCode .cl:before{content:counter(ln);display:inline-block;width:2.6em;text-align:right;margin-right:12px;color:#475569}
+  #cpCode .k{color:#c084fc}#cpCode .s{color:#86efac}#cpCode .n{color:#fdba74}#cpCode .f{color:#7dd3fc}
+  #cpCode .co{color:#64748b}
+  #cpCode .ca{color:#fbbf24;background:#fbbf2418;border-radius:3px}
+  #cpCode .cl.add{background:#fbbf2410}
+  .cp-src{font-size:.76rem;color:#94a3b8;margin-top:12px;border-top:1px solid #1e293b;padding-top:8px}
+  .cp-src a{color:#7dd3fc}
+  .codebar{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px;align-items:center}
+  .codebar span{font-size:.8rem;color:var(--muted)}
+  button.codebtn{background:#0f172a;color:#fcd34d;font-size:.82rem;padding:5px 11px;border-radius:999px;border:0}
+  @media(max-width:900px){body.cp-open{padding-right:0}#cp{width:100%}}
+
+  /* ---- Geri yolculuk (türev akışı) ---- */
+  #geri{--c:#c0392b;--bg2:#fbe9e7}
+  .gs-wrap{display:grid;grid-template-columns:230px 1fr;gap:12px;margin:10px 0;align-items:start}
+  .gs-list{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow:auto;padding:2px}
+  .gs-item{background:#fff;border:2px solid #e2e8f0;border-radius:10px;padding:6px 9px;font-size:.82rem;cursor:pointer;text-align:left;color:#1f2937;position:relative}
+  .gs-item small{display:block;color:var(--muted);font-size:.72rem}
+  .gs-item.seen{border-color:#fca5a5;background:#fff5f5}
+  .gs-item.cur{border-color:var(--c);background:#fee2e2;box-shadow:0 0 0 3px #c0392b33}
+  .gs-item.grp{border-left:6px solid #7b3fa0}
+  .gs-det{background:#fff;border:2px solid var(--c);border-radius:12px;padding:10px 12px;font-size:.92rem;min-height:260px}
+  .gs-det h4{margin:0 0 6px;color:var(--c);font-size:1.02rem}
+  .gs-det .lab{display:inline-block;font-size:.72rem;font-weight:700;border-radius:6px;padding:1px 7px;margin-right:6px;color:#fff}
+  .gs-det p{margin:6px 0}
+  .lab.in{background:#6b7280}.lab.own{background:#16a34a}.lab.out{background:#2f6fb0}.lab.why{background:#b45309}.lab.ex{background:#7b3fa0}
+  .gs-arrow{color:var(--c);font-weight:700}
+  .gbar{display:grid;grid-template-columns:110px 1fr 70px;gap:6px;align-items:center;font-size:.8rem;margin:3px 0}
+  .gbar .tr{background:#f1f5f9;border-radius:5px;height:14px;overflow:hidden}
+  .gbar .fl{height:100%;border-radius:5px}
+  .gbar .v{font-family:ui-monospace,Consolas,monospace;font-size:.74rem;text-align:right}
+  @media(max-width:700px){.gs-wrap{grid-template-columns:1fr}.gs-det{order:-1}.gs-list{max-height:none;flex-direction:row;flex-wrap:wrap}.gs-item{flex:1 1 140px}}
 </style>
 </head>
 <body>
@@ -118,6 +169,7 @@
   <!-- T1 -->
   <section class="card open" id="c1" style="--c:#6b7280;--bg2:#eef0f3" data-shape="Döngü" data-note="5 adım, milyonlarca tekrar">
     <h2>1. Büyük resim: eğitim döngüsü <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="loop">Eğitim döngüsü kodu</button></div>
     <div class="flow">
       <div class="fbox"><b>① Veri</b><br>metin parçaları (batch / küme)</div><span class="farr">→</span>
       <div class="fbox"><b>② İleri yayılım</b><br>çıkarım sayfasındaki akış</div><span class="farr">→</span>
@@ -144,6 +196,7 @@
   <!-- T2 -->
   <section class="card open" id="c2" style="--c:#2f6fb0;--bg2:#e6f0fa" data-shape="Loss = −ln(p)" data-note="Tek bir hata sayısı">
     <h2>2. Loss (Kayıp): hata tek bir sayıya nasıl dönüşüyor? <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="loss">Loss (Cross-Entropy) kodu</button></div>
     <div>Model doğru kelimeye ne kadar olasılık verdiyse, hata o kadar küçük. Formül: <span class="chip">Loss = −ln(p_doğru)</span> (Cross-Entropy / Çapraz Entropi)</div>
     <div class="detail">
       <div class="row">Doğru kelime "yedim". Modelin ona verdiği olasılık: <input type="range" id="lp" min="1" max="99" step="1" value="62"> <span class="mono" id="lpv"></span></div>
@@ -166,6 +219,7 @@
   <!-- T3 -->
   <section class="card open" id="c3" style="--c:#c0392b;--bg2:#fbe9e7" data-shape="∂Loss/∂w" data-note="Hata sondan başa doğru dağıtılıyor">
     <h2>3. Backpropagation (Geri Yayılım) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="manual">Elle backprop + backward() kodu</button></div>
     <div>Her ağırlık için tek bir soruyu cevaplar: <b>"Bu sayıyı çok az artırırsam loss ne kadar ve hangi yönde değişir?"</b> Bu cevaba türev (gradient / eğim) denir.</div>
     <div class="detail">
       <div class="why"><b class="l">Zincir kuralı = dişli çarklar.</b> Bir dişliyi biraz çevirirsen sonraki dişli kendi oranıyla, onun ardındaki de kendi oranıyla döner. Sondaki dönüş, aradaki tüm oranların <b>çarpımıdır</b>. Ağdaki her katman da değişimi kendi oranıyla büyütür ya da küçültür. Sondan başa gidip bu oranları çarparak "ilk ağırlık oynarsa loss ne kadar oynar" hesaplanır.</div>
@@ -176,7 +230,7 @@
       </ol>
       <div class="good"><b>✅ "Sondan başa doğru türev alınır, ağırlıklar güncellenir"</b> cümlesi büyük ölçüde doğru.</div>
       <div class="fix"><b>🔧 İnce ayar 1:</b> Türevi alınan şey "her işlemin kendi türevi" değil, <b>loss'un o ağırlığa göre türevidir</b>. Yerel türevler zincirle çarpılıp oraya taşınır.</div>
-      <div class="fix"><b>🔧 İnce ayar 2:</b> Backpropagation <b>sadece türevleri hesaplar</b>. Ağırlıkları güncelleyen ayrı bir adımdır (bkz. 4. kart: optimizer). Pratikte önce tüm türevler hesaplanır, sonra güncelleme yapılır.</div>
+      <div class="fix"><b>🔧 İnce ayar 2:</b> Backpropagation <b>sadece türevleri hesaplar</b>. Ağırlıkları güncelleyen ayrı bir adımdır (bkz. 5. kart: optimizer). Pratikte önce tüm türevler hesaplanır, sonra güncelleme yapılır.</div>
       <div class="fix"><b>🔧 İnce ayar 3:</b> Tek örnekle değil, bir batch (küme) üzerinden ortalanan loss'un türeviyle çalışılır. Bu işlem milyonlarca kez tekrarlanır.</div>
 
       <hr class="d">
@@ -233,9 +287,61 @@
   </section>
   <div class="arrow">↓</div>
 
+  <section class="card open" id="geri" style="--c:#c0392b;--bg2:#fbe9e7" data-shape="Türev: sondan başa" data-note="Her durakta: kendi ağırlığına yaz, türevi geriye ilet">
+    <h2>4. Geri yolculuk: türev GPT-2'nin içinde nasıl akıyor? <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="blk">Bloğun geri yolu (kod)</button><button class="codebtn" data-code="shortcut">Kısayol deneyi (kod)</button><button class="codebtn" data-code="emb">Embedding türevi (kod)</button><button class="codebtn" data-code="gpt">GPTModel (kod)</button></div>
+    <div>3. kartta türevi <b>2 ağırlıklı</b> bir ağda gördük. GPT-2'de <b>aynı iş</b>, yalnızca durak sayısı fazla: loss'tan başlayıp <b>çıkarım sayfasındaki yolu tersten</b> yürüyoruz (çıkış → 12 blok → embedding). Her durakta yalnızca iki şey olur.</div>
+    <div class="detail">
+      <div class="why"><b class="l">İki kural (hepsi bu):</b><br>
+        <b>① Durağın kendi ağırlığı varsa</b> (tablo, matris), o ağırlığın türevini yazar. Bu, "bu sayı değişirse loss ne olur" demektir.<br>
+        <b>② Türevi bir önceki durağa iletir.</b> Ters yönde yürüdüğümüz için "önceki" = ileri geçişte bir sonraki istasyon.<br>
+        <b>Benzetme:</b> Fabrikada bitmiş ürün kalite kontrolde bozuk çıktı. Müfettiş, ürünün geldiği son istasyona "sen ne kadar suçlusun?" diye sorar. O istasyon da kendi girdisine bakıp bir önceki istasyona sorar. Böyle tersten giderek <b>her istasyonun suç payı</b> (türev) çıkar. Sonra her istasyon kendi ayarını payına göre düzeltir.</div>
+
+      <h3>🚶 Adım adım gez (kendin ilerlet)</h3>
+      <div>Örnek: <b>"Sabah armut"</b> girdi, hedef: <b>"yedim"</b>. Soldan bir durak seç ya da düğmelerle ilerle. (Çıkarım sayfasındaki akışın tam tersi sırada.)</div>
+      <div class="row">
+        <button id="gsPrev" class="alt">◀ Önceki durak</button>
+        <button id="gsNext">Sonraki durak ▶</button>
+        <button id="gsPlay" class="alt">▶ Hepsini oynat</button>
+        <button id="gsReset" class="alt">Sıfırla</button>
+      </div>
+      <div class="gs-wrap">
+        <div class="gs-list" id="gsList"></div>
+        <div class="gs-det" id="gsDet"></div>
+      </div>
+      <div class="warn"><b class="l">⚠️ Sadeleştirmeler:</b> (1) Aşağıdaki "kendi ağırlıkları" satırlarındaki bias (sabit eklenen) sayılar ve Dropout ayrıntıları atlandı. (2) 12 blok <b>aynı yapıda ama farklı ağırlıklarla</b> tekrar eder; sayfada tek blok gösteriliyor. (3) "Sabah armut" örneğindeki olasılıklar (%2, %90 gibi) anlatım için <b>uydurmadır</b>; gerçek model başka değerler verir.</div>
+
+      <hr class="d">
+      <h3>🧮 Hangi ağırlık kaç sayı? (JavaScript ile hesaplandı)</h3>
+      <div>Hepsi aynı döngüyle, <b>tek geri geçişte</b> türev alır. Yaklaşık sayılar (bias'lar hariç):</div>
+      <div id="gsCount"></div>
+      <div class="why"><b class="l">Neden önemli?</b> Kelime tablosu parametrelerin yaklaşık üçte biri, ama bir adımda <b>sadece o yığında geçen token'ların satırları</b> türev alır. FFN ve attention matrisleri ise her token için çalıştığından <b>her adımda tamamen</b> türev alır.</div>
+
+      <hr class="d">
+      <h3>🔗 Türev neden ilk bloğa kadar ulaşabiliyor? Kısayol (residual connection / artık bağlantı)</h3>
+      <div>Zincir kuralı türevleri <b>çarpar</b>. 1'den küçük sayılar çarpıla çarpıla sıfıra iner: <span class="chip">0,5 × 0,5 × … (12 kez) ≈ 0,0002</span>. Buna <b>vanishing gradient (kaybolan türev)</b> denir. Girişe en yakın katman neredeyse hiç öğrenmez.</div>
+      <div class="why"><b class="l">Çare: <span class="chip">y = x + f(x)</span></b> Girdiyi çıktıya <b>olduğu gibi</b> ekliyoruz. Türevi <span class="chip">1 + f'(x)</span>. f'(x) sıfıra insin, çarpan yine 1 kalır. Bloktaki iki <span class="chip">x = x + shortcut</span> satırı budur: türev için bir "otoyol".</div>
+      <div><b>Gerçek ölçüm</b> (5 katmanlı deney ağı, aynı başlangıç sayıları; bar uzunlukları logaritmik, değerler "ortalama |türev|"):</div>
+      <div id="gsBars"></div>
+      <div class="good"><b>✅ Okuma:</b> Kısayolsuz ağda girişe en yakın katmanın türevi <b>0,0002</b>, kısayollu ağda <b>0,2217</b>: yaklaşık <b>1.100 kat</b> fark. Model sadece 5 katman, GPT-2'de 12 blok × 2 kısayol var.</div>
+      <div class="warn"><b class="l">⚠️ Kaynak:</b> Bu sayılar, <a class="lnk" href="https://github.com/celiktepesahin/chatgpt-from-scratch-tr" target="_blank" rel="noopener">chatgpt-from-scratch-tr</a> not defterindeki deney çıktılarından alındı (Ders 08). Kodu yukarıdaki <b>Kısayol deneyi</b> düğmesinde.</div>
+
+      <hr class="d">
+      <h3>🎯 Özet: bir eğitim adımında neler olur?</h3>
+      <ol>
+        <li><b>İleri geçiş:</b> metin → tokenlar → 12 blok → 50.257 puan (çıkarım sayfasındaki akış).</li>
+        <li><b>Loss:</b> doğru token'a verilen olasılıktan tek bir hata sayısı.</li>
+        <li><b>Geri geçiş:</b> yukarıdaki duraklar sırayla, <b>tek geçişte</b> bütün ağırlıkların türevi hazır olur.</li>
+        <li><b>Güncelleme:</b> optimizer (5. kart) bu türevleri alıp <b>her ağırlığı birden</b> azıcık kaydırır.</li>
+      </ol>
+    </div>
+  </section>
+  <div class="arrow">↓</div>
+
   <!-- T4 -->
   <section class="card open" id="c4" style="--c:#e08a1e;--bg2:#fdf0dc" data-shape="w − LR × türev" data-note="Adım büyüklüğü önemli">
-    <h2>4. Güncelleme: Optimizer ve LR (Learning Rate / Öğrenme Hızı) <small>başlığa tıkla</small></h2>
+    <h2>5. Güncelleme: Optimizer ve LR (Learning Rate / Öğrenme Hızı) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="loop">optimizer.step() ve AdamW kodu</button></div>
     <div>Türev yönü söyler, <b>LR adımın büyüklüğünü</b> söyler: <span class="chip">w_yeni = w_eski − LR × türev</span></div>
     <div class="detail">
       <div class="why"><b class="l">Sisli dağ benzetmesi:</b> LR çok küçükse adımlar minik, inmek yıllar sürer. LR çok büyükse vadinin karşı yamacına sıçrarsın, hatta daha yukarı çıkarsın. Aşağıda basit bir tek ağırlıklı örnek var (loss = (w − 3)², en iyi nokta w = 3, başlangıç w = 0).</div>
@@ -254,7 +360,8 @@
 
   <!-- T5 -->
   <section class="card open" id="sayilar" style="--c:#7b3fa0;--bg2:#f1e6f7" data-shape="Rastgele → anlamlı" data-note="Anlam eğitimde ortaya çıkıyor">
-    <h2>5. Sayılar nereden geliyor? (768 boyut, Wq/Wk/Wv, konum) <small>başlığa tıkla</small></h2>
+    <h2>6. Sayılar nereden geliyor? (768 boyut, Wq/Wk/Wv, konum) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="emb">Embedding tablosu kodu</button><button class="codebtn" data-code="gpt">GPTModel kodu</button></div>
     <div>Başlangıçta tüm tablolar ve matrisler <b>rastgele küçük sayılardır</b>, hiçbir anlam taşımazlar. Anlam eğitimle kendiliğinden ortaya çıkar.</div>
     <div class="detail">
       <b>Kelime vektörleri nasıl yakınlaşıyor?</b> Kaydırıcıyı çek: eğitim ilerledikçe benzer bağlamlarda geçen kelimeler (armut, elma) birbirine yaklaşır.
@@ -281,7 +388,7 @@
           <div style="text-align:center;margin:6px 0"><span class="chip">x · Wq = (kelime · Wq) + (konum · Wq)</span></div>
           Yani Wq, kelime kısmına ve konum kısmına <b>ayrı ayrı</b> etki eder. Wq'nun içindeki sayılar hangi bilginin ne kadar ve nasıl okunacağını belirler.</li>
         <li><b>768 boyutta yer bol.</b> Yüksek boyutlu uzayda iki farklı bilgi birbirini ezmeden farklı yönlerde durabilir (rastgele iki vektör bile neredeyse birbirine diktir). Radyo benzetmesi: aynı antene iki istasyon aynı anda çalar, alıcının düğmesini çevirince birini seçersin. <b>Wq, Wk, Wv o düğmelerdir.</b></li>
-        <li><b>Düğmeleri kim çeviriyor?</b> Backpropagation (3. kart) ve güncelleme (4. kart). Konum bilgisini kullanmak loss'u azaltıyorsa, türev hem Wq/Wk/Wv içindeki ilgili sayıları hem de konum tablosunu o yönde kaydırır. Kimse "konumu şöyle oku" diye yazmaz, hatayı azaltan şey azar azar pekişir.</li>
+        <li><b>Düğmeleri kim çeviriyor?</b> Backpropagation (3. kart) ve güncelleme (5. kart). Konum bilgisini kullanmak loss'u azaltıyorsa, türev hem Wq/Wk/Wv içindeki ilgili sayıları hem de konum tablosunu o yönde kaydırır. Kimse "konumu şöyle oku" diye yazmaz, hatayı azaltan şey azar azar pekişir.</li>
         <li><b>Örnek:</b> "Hep bir önceki kelimeye bak" gibi davranışlar böyle ortaya çıkabilir: Q'nun ve K'nin konum kısımları, sıra n ile n−1 birbirine yüksek puan verecek şekilde ayarlanır. Benzer davranan başlar GPT-2 üzerine yapılan araştırmalarda bulunmuştur.</li>
       </ol>
     </div>
@@ -290,7 +397,8 @@
 
   <!-- T6 -->
   <section class="card open" id="aktivasyon" style="--c:#e08a1e;--bg2:#fdf0dc" data-shape="Türev: GELU vs ReLU" data-note="Zincir kopmamalı">
-    <h2>6. Aktivasyonun türevi: GELU neden, ReLU neden değil? <small>başlığa tıkla</small></h2>
+    <h2>7. Aktivasyonun türevi: GELU neden, ReLU neden değil? <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="gelu">GELU kodu</button></div>
     <div>Geri yayılımda zincir, aktivasyonun türevinden de geçer. Türev 0 olursa o noktada zincir <b>sönüp gider</b>.</div>
     <div class="detail">
       <div class="row">x değeri: <input type="range" id="gx" min="-4" max="4" step="0.05" value="1"> <span class="mono" id="gxv"></span></div>
@@ -314,7 +422,7 @@
 
   <!-- T7 -->
   <section class="card open" id="c7" style="--c:#2a9d9a;--bg2:#e0f4f3" data-shape="Pratik notlar" data-note="Büyük ölçekte eğitim">
-    <h2>7. Pratik notlar: batch, overfitting, ölçek <small>başlığa tıkla</small></h2>
+    <h2>8. Pratik notlar: batch, overfitting, ölçek <small>başlığa tıkla</small></h2>
     <div>Aynı döngü, çok büyük bir metin yığınında, çok sayıda tekrarla çalışır.</div>
     <div class="detail">
       <ul>
@@ -355,6 +463,18 @@
   </div>
   <footer>Çıkarım kısmı için <a class="lnk" href="GPT2_Mimari.html">GPT2_Mimari.html</a></footer>
 </div>
+
+<aside id="cp" aria-label="Kod paneli">
+  <div class="cp-h"><select id="cpSel" aria-label="Kod seç"></select><button class="alt" id="cpCopy">📋 Kopyala</button><button id="cpClose" aria-label="Kapat">✕ Kapat</button></div>
+  <div class="cp-b">
+    <h3 id="cpTitle"></h3>
+    <div class="cpi" id="cpIntro"></div>
+    <div class="cpw" id="cpWhy"></div>
+    <div class="cp-leg">Renkler: <i class="co">gri = not defterindeki özgün yorum</i> <i class="ca">sarı = <b>#▶</b> bizim eklediğimiz açıklama</i></div>
+    <pre id="cpCode"></pre>
+    <div class="cp-src" id="cpSrc"></div>
+  </div>
+</aside>
 <script>
 
 const cards=[...document.querySelectorAll('.card')];
@@ -476,7 +596,7 @@ document.getElementById('es').oninput=renderEm;renderEm();
 const opts=[['Ağırlıkları günceller',false],['Loss\'un her ağırlığa göre türevini hesaplar',true],['Bir sonraki kelimeyi üretir',false],['Metni token\'lara böler',false]];
 const qb=document.getElementById('quizBtns');
 opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='alt';b.textContent=t;
-  b.onclick=()=>{document.getElementById('quizRes').innerHTML=ok?'<span class="ok">✅ Doğru! Güncellemeyi optimizer yapar.</span>':'<span class="no">❌ Tekrar dene. İpucu: 3. ve 4. kartın farkı.</span>'};
+  b.onclick=()=>{document.getElementById('quizRes').innerHTML=ok?'<span class="ok">✅ Doğru! Güncellemeyi optimizer yapar.</span>':'<span class="no">❌ Tekrar dene. İpucu: 3. ve 5. kartın farkı.</span>'};
   qb.appendChild(b)});
 // ---------- kart gezintisi ----------
 function setActive(i){
@@ -511,6 +631,205 @@ playBtn.onclick=()=>{
   },3500);
 };
 
+
+
+// ---------- Kod paneli ----------
+const CODE={"loop": {"title": "Eğitim döngüsü (5 adım)", "src": "Ders 10 · hücre 397–399", "intro": "Hepsi bu: <b>sıfırla → ileri → loss → geri → güncelle</b>. Bu 5 satır milyonlarca kez tekrarlanır.", "why": "Her satırın sırası önemli: <code>zero_grad</code> eski türevleri siler (yoksa üst üste birikir), <code>backward</code> türevleri <b>hesaplar</b>, <code>step</code> ağırlıkları <b>günceller</b>. Backprop ile optimizer ayrı işlerdir.", "code": "def train_model_simple(model, train_loader, val_loader, optimizer, device, num_epochs,\n                       eval_freq, eval_iter, start_context, tokenizer):\n    for epoch in range(num_epochs):                      #▶ Epoch: eğitim metninin tamamı bir kez\n        model.train()                                    #▶ eğitim modu: Dropout açık\n\n        for input_batch, target_batch in train_loader:   #▶ her yığın = bir adım\n            optimizer.zero_grad()                        #▶ 1. önceki adımın türevlerini sil\n            loss = calc_loss_batch(input_batch, target_batch, model, device)   #▶ 2. ileri geçiş + loss\n            loss.backward()                              #▶ 3. GERİ GEÇİŞ: tüm ağırlıkların türevi .grad'e yazılır\n            optimizer.step()                             #▶ 4. ağırlıkları güncelle (burada AdamW)\n            ...                                          #▶ (arada ölçüm ve örnek metin üretimi var)\n\n#▶ Kurulum: AdamW, Adam ailesinden bir optimizer. lr = adım büyüklüğü, weight_decay = ağırlıkları hafifçe sıfıra çeken fren.\ntorch.manual_seed(123)\nmodel = GPTModel(GPT_CONFIG_124M)                        #▶ rastgele ağırlıklarla başla\noptimizer = torch.optim.AdamW(model.parameters(), lr=0.0004, weight_decay=0.1)"}, "loss": {"title": "Loss: Cross-Entropy", "src": "Ders 10 · hücre 380", "intro": "Model her konumda 50.257 puan üretir. Cross-Entropy, <b>doğru token'a verilen olasılığın</b> −ln'sini alıp hepsinin ortalamasını verir.", "why": "Neden böyle? Doğru token'a %90 verdiyse loss küçük, %1 verdiyse büyük. Tek bir sayı çıkar; backpropagation bu sayıdan geriye doğru çalışır.", "code": "def calc_loss_batch(input_batch, target_batch, model, device):\n    input_batch, target_batch = input_batch.to(device), target_batch.to(device)\n    #▶ İLERİ GEÇİŞ: her konumda her token'a bir puan. (b, T) -> (b, T, 50257)\n    logits = model(input_batch)\n    #▶ target_batch = girdinin BİR TOKEN SAĞA KAYMIŞ hali (her konumun doğru cevabı).\n    #▶ flatten: yığın ve konum eksenlerini birleştir; cross_entropy tek seferde -ln(p) ortalamasını alır.\n    return torch.nn.functional.cross_entropy(logits.flatten(0, 1), target_batch.flatten())"}, "manual": {"title": "Backprop elle: zincir kuralı", "src": "Ders 08 · hücre 311–317", "intro": "Minik ağ: <code>girdi → w1 → ReLU → w2 → tahmin</code>. Türevleri <b>elle zincirle</b> bulup PyTorch'un <code>backward()</code> sonucuyla karşılaştırıyor.", "why": "Zincirin her halkası kendi yerel türevini ekler ve hepsi <b>çarpılır</b>. <code>backward()</code> bu çarpımları senin yerine yapar; GPT-2'de de aynı iş, sadece halka sayısı çok fazla.", "code": "x, target = 2.0, 8.0\nw1, b1, w2, b2 = 1.5, -1.0, 2.0, 1.0\n\n#▶ İLERİ GEÇİŞ\nz = w1 * x + b1            # ham toplam\na = max(0.0, z)            # ReLU kapısı\npred = w2 * a + b2         # tahmin\nloss = (pred - target) ** 2\n\n#▶ GERİ GEÇİŞ: kayıptan başlayıp halka halka geriye. Her satır bir önceki türevi YENİ bir yerel türevle çarpar.\ndL_dpred = 2 * (pred - target)                  #▶ loss tahmini ne kadar etkiliyor\ndL_dw2 = dL_dpred * a                           #▶ w2 tahmini 'a' kadar etkiler\ndL_db2 = dL_dpred * 1.0\ndL_da = dL_dpred * w2                           #▶ zincirde bir geri adım: tahmin, a'yı w2 kadar etkiler\ndL_dz = dL_da * (1.0 if z > 0 else 0.0)         #▶ ReLU türevi: z pozitifse 1, değilse 0 (gradyanı keser!)\ndL_dw1 = dL_dz * x                              #▶ w1, z'yi x kadar etkiler\ndL_db1 = dL_dz * 1.0\n\n#▶ PyTorch aynısını kendisi yapar: requires_grad ile yapılan işlemler kaydedilir, backward() kaydı geri sarar.\ntw1, tb1, tw2, tb2 = (torch.tensor(v, requires_grad=True) for v in (w1, b1, w2, b2))\nt_pred = tw2 * torch.relu(tw1 * x + tb1) + tb2   # ileri geçiş (kayıt tutuluyor)\nt_loss = (t_pred - target) ** 2\nt_loss.backward()                                #▶ tek satır = yukarıdaki yedi satır\n# tw1.grad == dL_dw1, tw2.grad == dL_dw2 ... (iki sütun birebir aynı çıkıyor)"}, "blk": {"title": "Bloğun geri yolu (kısayol nerede?)", "src": "Ders 09 · hücre 345", "intro": "Aynı <code>TransformerBlock</code>, bu kez <b>geri giden türev</b> gözüyle. <code>backward()</code> ileri geçişteki satırları <b>tersten</b> yürür.", "why": "Her <code>x = x + shortcut</code> satırında türev ikiye ayrılır: biri kısayoldan <b>doğrudan</b> geriye, biri attention/FFN içinden geçip geriye. Böylece 12 blok üst üste olsa da türev ilk bloğa ulaşır.", "code": "def forward(self, x):                   #▶ (İLERİ yön: yukarıdan aşağı. GERİ yön: aşağıdan yukarı)\n    shortcut = x\n    x = self.norm1(x)                   #▶ GERİ(5): LayerNorm'un scale/shift'i türev alır, türev girdiye geçer\n    x = self.att(x)                     #▶ GERİ(4): Wq, Wk, Wv ve out_proj burada türev alır\n    x = self.drop_shortcut(x)           #▶ GERİ(3): rastgele kapatılan sayılara türev 0 gider\n    x = x + shortcut                    #▶ GERİ(2): türev İKİYE ayrılır: biri shortcut'a (doğrudan), biri yukarıdaki satırlara\n\n    shortcut = x\n    x = self.norm2(x)\n    x = self.ff(x)                      #▶ W1 ve W2 (FFN matrisleri) türev alır\n    x = self.drop_shortcut(x)\n    x = x + shortcut                    #▶ GERİ(1): backward() BURADAN başlar (bloğun çıkışı), yukarı doğru yürür\n    return x"}, "shortcut": {"title": "Kaybolan gradyan ve kısayol", "src": "Ders 08 · hücre 325–332", "intro": "5 katmanlı bir deney ağında türevlerin <b>girişe doğru ne kadar küçüldüğünü</b> ölçer; sonra tek bayrağı (kısayol) açıp tekrar ölçer.", "why": "Zincir kuralı türevleri çarpar; 1'den küçük sayılar çarpıla çarpıla sıfıra iner. Kısayollu katmanda <code>y = x + f(x)</code> olduğu için türev <code>1 + f'(x)</code>: çarpan 1'in altına düşmez.", "code": "class ExampleDeepNeuralNetwork(nn.Module):\n    def __init__(self, layer_sizes, use_shortcut):\n        super().__init__()\n        self.use_shortcut = use_shortcut\n        self.layers = nn.ModuleList([\n            nn.Sequential(nn.Linear(layer_sizes[0], layer_sizes[1]), GELU()),\n            nn.Sequential(nn.Linear(layer_sizes[1], layer_sizes[2]), GELU()),\n            nn.Sequential(nn.Linear(layer_sizes[2], layer_sizes[3]), GELU()),\n            nn.Sequential(nn.Linear(layer_sizes[3], layer_sizes[4]), GELU()),\n            nn.Sequential(nn.Linear(layer_sizes[4], layer_sizes[5]), GELU())\n        ])\n\n    def forward(self, x):\n        for layer in self.layers:\n            layer_output = layer(x)\n            if self.use_shortcut and x.shape == layer_output.shape:\n                x = x + layer_output        #▶ KISAYOL: girdiyi çıktıya ekle (türev: 1 + f'(x))\n            else:\n                x = layer_output            #▶ kısayol yok: sinyal sadece katmandan geçer\n        return x\n\ndef print_gradients(model, x):\n    output = model(x)                        #▶ ileri geçiş\n    target = torch.tensor([[0.]])\n    loss = nn.MSELoss()(output, target)      #▶ loss\n    loss.backward()                          #▶ geri geçiş: türevler .grad'e yazılır\n    for name, param in model.named_parameters():\n        if 'weight' in name:\n            print(f\"{name} has gradient mean of {param.grad.abs().mean().item()}\")\n\n#▶ KISAYOLSUZ (layers.0 = girişe en yakın, layers.4 = çıkışa en yakın):\n# layers.0.0.weight  0.00020\n# layers.1.0.weight  0.00012\n# layers.2.0.weight  0.00072\n# layers.3.0.weight  0.00140\n# layers.4.0.weight  0.00505\n#▶ KISAYOLLU: aynı ağ, tek bayrak değişti -> türevler ~1 100 kat büyük, hepsi aynı mertebede\n# layers.0.0.weight  0.2217\n# layers.1.0.weight  0.2069\n# layers.2.0.weight  0.3290\n# layers.3.0.weight  0.2666\n# layers.4.0.weight  1.3259"}, "emb": {"title": "Embedding: sadece kullanılan satırlar öğrenir", "src": "Ders 03 · hücre 100–104", "intro": "Token tablosu bir <b>arama tablosudur</b>; ileri geçişte tek yaptığı satır seçmektir. Geri geçişte de <b>sadece seçilen satırlar</b> türev alır.", "why": "50 257 satırlık tablodan bir adımda sadece o yığında geçen token'ların satırları güncellenir; gerisine dokunulmaz. Bu yüzden “armut” satırı, ancak “armut” geçen örneklerde değişir.", "code": "input_ids = torch.tensor([2, 3, 5, 1])      #▶ dört token numarası\n\nvocab_size = 6\noutput_dim = 3\n\ntorch.manual_seed(123)\n#▶ Tablo: (6, 3). Her satır bir kelimenin 3 sayısı. Başlangıçta rastgele; eğitim bunları öğrenir.\nembedding_layer = torch.nn.Embedding(vocab_size, output_dim)\n\nprint(embedding_layer.weight)\n#▶ Parameter(..., requires_grad=True): \"bu tensörün türevi hesaplanacak, yani öğrenilecek\" demek.\n\nprint(embedding_layer(input_ids))\n#▶ Çıktı: (4, 3). Katman satır seçmekten başka bir şey yapmıyor (hesap yok, arama var).\n#▶ Geri geçişte türev sadece 2., 3., 5. ve 1. satırlara gider; 0 ve 4. satırların türevi sıfır kalır."}, "gelu": {"title": "GELU ve türevi", "src": "Ders 07 · hücre 275", "intro": "GELU'nun formülü. Türevi (eğimi) pürüzsüzdür; bu yüzden geri giden türev ReLU'daki gibi ani kesilmez.", "why": "ReLU'da x &lt; 0 iken türev tam 0'dır (“ölü nöron”); GELU'da küçük bir türev kalır. Zincir kuralında bir halka 0 olursa arkasındaki her şey 0 olur, bu yüzden önemlidir.", "code": "class GELU(nn.Module):\n    def forward(self, x):\n        #▶ Her sayıya tek tek uygulanır; şekil değişmez.\n        #▶ Geri geçişte bu halkanın yerel türevi PyTorch tarafından otomatik hesaplanır (elle yazmıyoruz).\n        return 0.5 * x * (1 + torch.tanh(\n            torch.sqrt(torch.tensor(2.0 / torch.pi)) *\n            (x + 0.044715 * torch.pow(x, 3))\n        ))"}, "gpt": {"title": "GPTModel: hepsi bir arada", "src": "Ders 09 · hücre 265, 349", "intro": "Tüm parçalar burada birleşir: token+konum tabloları → 12 blok → son hizalama → çıkış katmanı (768 → 50.257 puan).", "why": "Çıkışta her konum için <b>50.257 puan</b> (logit) çıkar. Çıkarımda yalnız son konumun puanı kullanılır; <b>eğitimde</b> bütün konumlar loss'a girer.", "code": "GPT_CONFIG_124M = {\n    \"vocab_size\": 50257,     #▶ sözlük boyu\n    \"context_length\": 1024,  #▶ bağlam penceresi (token)\n    \"emb_dim\": 768,          #▶ her token'ın vektör boyu\n    \"n_heads\": 12,           #▶ attention başı sayısı\n    \"n_layers\": 12,          #▶ transformer bloğu sayısı\n    \"drop_rate\": 0.1,        #▶ eğitimde değerlerin %10'unu rastgele sıfırlar\n    \"qkv_bias\": False\n}\n\nclass GPTModel(nn.Module):\n    def __init__(self, cfg):\n        super().__init__()\n        self.tok_emb = nn.Embedding(cfg[\"vocab_size\"], cfg[\"emb_dim\"])       #▶ kelime tablosu (50257, 768)\n        self.pos_emb = nn.Embedding(cfg[\"context_length\"], cfg[\"emb_dim\"])   #▶ konum tablosu (1024, 768)\n        self.drop_emb = nn.Dropout(cfg[\"drop_rate\"])\n        self.trf_blocks = nn.Sequential(                                     #▶ 12 ayrı blok, sırayla\n            *[TransformerBlock(cfg) for _ in range(cfg[\"n_layers\"])])\n        self.final_norm = LayerNorm(cfg[\"emb_dim\"])\n        self.out_head = nn.Linear(cfg[\"emb_dim\"], cfg[\"vocab_size\"], bias=False)   #▶ 768 -> 50257 puan\n\n    def forward(self, in_idx):                                   # in_idx: (b, T) token numaraları\n        batch_size, seq_len = in_idx.shape\n        tok_embeds = self.tok_emb(in_idx)                        #▶ (b, T, 768)\n        pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))   # (T, 768)\n        x = tok_embeds + pos_embeds                              #▶ kelime + konum\n        x = self.drop_emb(x)\n        x = self.trf_blocks(x)                                   #▶ 12 blok, şekil değişmez\n        x = self.final_norm(x)\n        logits = self.out_head(x)                                #▶ (b, T, 768) -> (b, T, 50257)\n        return logits                                            #▶ her konumda 50 257 ham puan"}};
+const CP_REPO='https://github.com/celiktepesahin/chatgpt-from-scratch-tr';
+const cpEsc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function cpHl(line){
+  let code=line,com='',q=null,ci=-1;
+  for(let i=0;i<line.length;i++){const ch=line[i];
+    if(q){if(ch===q)q=null}else if(ch==='"'||ch==="'"){q=ch}else if(ch==='#'){ci=i;break}}
+  if(ci>=0){code=line.slice(0,ci);com=line.slice(ci)}
+  let h=cpEsc(code).replace(/("[^"]*"|'[^']*')|\b(class|def|return|for|in|if|else|import|from|with|not|and|or|None|True|False|assert|break|as)\b|\b(\d+\.?\d*(?:e-?\d+)?)\b|\b(self|super)\b/g,
+    (m,s,k,n,f)=>s?'<span class="s">'+s+'</span>':k?'<span class="k">'+k+'</span>':n?'<span class="n">'+n+'</span>':'<span class="f">'+f+'</span>');
+  const add=com.startsWith('#\u25B6');
+  if(com)h+='<span class="'+(add?'ca':'co')+'">'+cpEsc(com)+'</span>';
+  return '<span class="cl'+(add?' add':'')+'">'+h+'</span>';
+}
+// Satır sonundaki #▶ açıklamasını, kodun hemen üstüne ayrı satır olarak al (dar panelde taşmasın)
+function cpExpand(code){
+  const out=[];
+  code.split('\n').forEach(l=>{
+    const m=l.match(/^(\s*)(\S.*?)\s+(#\u25B6.*)$/);
+    if(m&&!m[2].startsWith('#')){out.push(m[1]+m[3]);out.push(m[1]+m[2])}else out.push(l);
+  });
+  return out;
+}
+let cpCur=null;
+function openCode(key){
+  const c=CODE[key]; if(!c)return;
+  cpCur=key;
+  document.getElementById('cpSel').value=key;
+  document.getElementById('cpTitle').textContent=c.title;
+  document.getElementById('cpIntro').innerHTML=c.intro;
+  document.getElementById('cpWhy').innerHTML='<b>Neden?</b> '+c.why;
+  document.getElementById('cpCode').innerHTML=cpExpand(c.code).map(cpHl).join('');
+  document.getElementById('cpSrc').innerHTML='Kaynak: <a href="'+CP_REPO+'/blob/main/FULL-SERIES.ipynb" target="_blank" rel="noopener">celiktepesahin/chatgpt-from-scratch-tr</a> (Apache-2.0), <code>FULL-SERIES.ipynb</code>, '+c.src+'. Kod burada <b>kısaltıldı</b> ve <b>#▶</b> açıklamaları eklendi; özgün hâli için depoya bak.';
+  document.body.classList.add('cp-open');
+  document.querySelector('#cp .cp-b').scrollTop=0;
+}
+function closeCode(){document.body.classList.remove('cp-open')}
+(function(){
+  const sel=document.getElementById('cpSel');
+  Object.keys(CODE).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent='💻 '+CODE[k].title;sel.appendChild(o)});
+  sel.onchange=()=>openCode(sel.value);
+  document.getElementById('cpClose').onclick=closeCode;
+  document.getElementById('cpCopy').onclick=e=>{
+    const b=e.target,t=CODE[cpCur].code;
+    const done=()=>{b.textContent='✔ Kopyalandı';setTimeout(()=>b.textContent='📋 Kopyala',1400)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,done)}else done();
+  };
+  document.querySelectorAll('button.codebtn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openCode(b.dataset.code)}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCode()});
+})();
+
+// ---------- Geri yolculuk: durak durak ----------
+const GS=[
+ {t:'Loss (kayıp)',sub:'türev burada doğar',
+  in:'Başlangıç: dLoss/dLoss = 1. Geri yolculuk buradan başlar.',
+  own:'Yok (sayı yalnızca ölçü).',
+  out:'Her konumdaki cross-entropy hatasına eşit pay (ortalama alındığı için 1/N).',
+  why:'Tüm hatayı tek sayıya indirmiştik. Şimdi bu sayıdan geriye doğru "kim ne kadar suçlu?" diye soracağız.',
+  ex:'"Sabah armut" → hedef "yedim". Model "yedim"e %2 vermiş (uydurma): loss = −ln(0,02) = __L__.'},
+ {t:'Softmax + puanlar (logits)',sub:'p − doğru cevap',
+  in:'Loss\'tan gelen pay.',
+  own:'Yok (softmax\'ın ağırlığı yoktur).',
+  out:'Her token için "olasılık − doğru cevap (1 ya da 0)". Şekil (T, 50.257).',
+  why:'Türev burada çok sadeleşir: <b>doğru token\'ın puanını artır, yanlışlarınkini azalt.</b> Doğru cevaba az olasılık vermişse türev büyük, çok vermişse küçük olur (az dokun).',
+  ex:'Doğru token "yedim" %2 aldıysa türevi 0,02 − 1 = <b>−0,98</b> (negatif: puanını ARTIR). %90 alsaydı 0,90 − 1 = <b>−0,10</b>: neredeyse dokunulmaz. Yanlış token\'lara kendi olasılıkları kadar pozitif türev gider (puanlarını AZALT). (1/N payını bir kenara bırakıyoruz.)'},
+ {t:'LM Head (çıkış matrisi)',sub:'768 → 50.257',
+  in:'Puan türevi: (T, 50.257).',
+  own:'Çıkış matrisi (768 × 50.257 ≈ __H__ milyon sayı). GPT-2\'de bu matris <b>kelime tablosuyla aynı sayılardır</b> (weight tying / ağırlık paylaşımı), bu yüzden türev tabloya yazılır.',
+  out:'Son vektörün türevi: (T, 768).',
+  why:'Matris çarpımının türevi iki parça verir: <b>matrise</b> giden (girdi × gelen türev: "bu satırlar şöyle değişsin") ve <b>girdiye</b> giden (gelen türev × matrisin devriği: "son vektör şöyle değişsin"). Biri güncellemeye, öbürü geriye gider.',
+  ex:'"yedim" token\'ının satırı, "armut" vektörüne daha çok benzesin diye çekilir. Yanlış token\'ların satırları uzaklaşır.'},
+ {t:'Son LayerNorm',sub:'hizalama',
+  in:'(T, 768) türev.',
+  own:'scale ve shift (768 + 768 sayı).',
+  out:'Hizalama işleminin türevi alınıp (T, 768) olarak geriye gider.',
+  why:'LayerNorm her token\'ın 768 sayısını ortak ölçeğe getirir. Hesabı (ortalama, yayılım) da zincire girer ama yerel türevi hazırdır; PyTorch otomatik çözer.',
+  ex:'Hizalamadan önceki vektörün hangi boyutu büyürse loss nasıl değişir, tek tek hesaplanır.'},
+ {t:'Blok · kısayol toplama (2)',sub:'12 blok aynı 6 durak',grp:1,
+  in:'Bloğun çıkışına gelen (T, 768) türev.',
+  own:'Yok.',
+  out:'Türev <b>iki kopya</b> olur: biri kısayoldan doğrudan geriye, biri FFN yolundan.',
+  why:'Toplamın türevi her iki girdiye de <b>aynen</b> gider (çarpan 1). Kısayolun gücü: her zaman çarpanı 1 olan açık bir yol var, türev bloktan bloğa kaybolmadan geçer.',
+  ex:'Kısayol yolundan gelen türev hiç değişmeden önceki durağa gider.'},
+ {t:'Blok · FFN (W2 → GELU → W1)',sub:'masa başı',grp:1,
+  in:'FFN yolundan gelen (T, 768) türev.',
+  own:'W2 (3.072 × 768) ve W1 (768 × 3.072): bloktaki toplam yaklaşık __F__ milyon sayı.',
+  out:'W2 devriğiyle (T, 3.072), GELU\'nun yerel türeviyle çarpılır (kapı kapalıysa ≈0 geçer), sonra W1 devriğiyle (T, 768).',
+  why:'<b>Kapalı kapının arkasına türev ulaşmaz.</b> Bu adımda "kapalı" kalan dedektörler (GELU çıkışı ≈ 0) neredeyse hiç düzeltilmez. Açık olanlara "şu bilgiyi yaz" diye düzeltme gelir. (GELU ReLU\'dan farklı olarak küçük bir türev bırakır.)',
+  ex:'"armut" token\'ı için "meyve/yiyecek" dedektörü açıktı; çıkışta "yedim" yönünde bir bilgi yazması gerektiğinden W2\'deki o satır "yedim" yönüne kayar.'},
+ {t:'Blok · LayerNorm 2 → kısayolla birleş',sub:'iki yol toplanır',grp:1,
+  in:'FFN yolundan gelen türev.',
+  own:'scale ve shift (768 + 768).',
+  out:'Kısayoldan gelen türevle <b>toplanır</b> (aynı sayı iki yoldan kullanıldı).',
+  why:'Çoklu yol kuralı: bir değer hem kısayola hem FFN\'ye gittiyse loss\'a iki yoldan etki eder; türevleri <b>toplanır</b>.',
+  ex:'Toplam = kısayol türevi + FFN yolunun türevi.'},
+ {t:'Blok · kısayol toplama (1)',sub:'attention çıkışı + girdi',grp:1,
+  in:'(T, 768) türev.',
+  own:'Yok.',
+  out:'Yine iki kopya: biri girdiye doğrudan, biri attention yoluna.',
+  why:'Birinci kısayol da aynı mantık: bilgi ve türev için ikinci bir otoyol.',
+  ex:'12 bloğun her biri iki kısayol taşıdığı için toplam 24 otoyol var.'},
+ {t:'Blok · Attention',sub:'toplantı',grp:1,
+  in:'Attention yolundan gelen (T, 768) türev.',
+  own:'Wq, Wk, Wv ve out_proj (4 × 768 × 768 ≈ __A__ milyon sayı).',
+  out:'out_proj → başlara bölünür → iki kola ayrılır: <b>V yolu</b> (yüzde × gelen türev) ve <b>skor yolu</b> (softmax türevi → Q ve K). Sonra Wq/Wk/Wv\'den geçip (T, 768) olarak geriye.',
+  why:'Model sadece "ne bilgi verdi" (V) değil, <b>"kime bakmalıydı"</b> (Q·K) da düzeltilir. <b>Nedensel maske:</b> gelecekteki hücreler −∞ olmuştu, softmax orada 0 verdi; bu hücrelere türev de 0 gider, yani model geleceğe bakmayı öğrenmez.',
+  ex:'"armut" "yedim"i tahmin etmek için "Sabah"a daha çok baksaydı loss düşerdi diyorsa, "armut"un Q\'su ile "Sabah"ın K\'sı birbirine yaklaşacak yönde Wq/Wk güncellenir.'},
+ {t:'Blok · LayerNorm 1 → kısayolla birleş',sub:'sonra bloktan çık',grp:1,
+  in:'Attention yolundan gelen türev.',
+  own:'scale ve shift (768 + 768).',
+  out:'Kısayoldan gelen türevle toplanıp <b>bir önceki bloğa</b> (T, 768) olarak geçer. Blok 12 → Blok 11 → … → Blok 1: aynı 6 durak, her blokun ağırlıkları farklı.',
+  why:'Her blok kendi ağırlıklarının türevini yazıp türevi bir alt bloğa verir. İlk bloğa kadar türev, kısayollar sayesinde kaybolmadan ulaşır.',
+  ex:'Böylece 12 bloğun <b>her birinin</b> W1, W2, Wq, Wk, Wv sayıları tek geri geçişte türev alır.'},
+ {t:'Dropout (embedding sonrası)',sub:'kapalı sayılar',
+  in:'Blok 1\'den çıkan (T, 768) türev.',
+  own:'Yok.',
+  out:'Eğitimde rastgele kapatılan (0 yapılan) sayılara türev 0 gider, açık olanlar aynen geçer.',
+  why:'Kapalı sayı o adımda loss\'a katkı yapmadı; suç payı da yok.',
+  ex:'Çıkarımda Dropout yoktur, sadece eğitimde var.'},
+ {t:'Toplama: kelime + konum',sub:'iki kola kopya',
+  in:'(T, 768) türev.',
+  own:'Yok.',
+  out:'Türev iki kola <b>aynen kopyalanır</b>: biri konum tablosuna, biri kelime tablosuna.',
+  why:'Toplamın türevi her iki toplanana da 1 × gelen türev. Yani konum vektörü de, kelime vektörü de aynı düzeltmeyi "paylaşır".',
+  ex:'"armut" (sıra 1) için hem armut satırı hem de 1. konum satırı aynı yönde düzeltme alır.'},
+ {t:'Konum tablosu',sub:'1.024 × 768',
+  in:'(T, 768) türev.',
+  own:'Konum tablosu (1.024 × 768 ≈ __P__ bin sayı). Sadece <b>kullanılan konumların</b> (0 … T−1) satırları türev alır.',
+  out:'Yok (yolculuğun sonu).',
+  why:'Tablo bir arama tablosu: ileri geçişte satır seçildi, geri geçişte yalnızca seçilen satıra türev yazılır.',
+  ex:'Girdide 2 token varsa yalnız 0. ve 1. konum satırları değişir; 2…1023. konumlara dokunulmaz.'},
+ {t:'Kelime tablosu',sub:'50.257 × 768',
+  in:'(T, 768) türev (+ LM Head\'den gelen türev, weight tying sayesinde).',
+  own:'Kelime tablosu (50.257 × 768 ≈ __T__ milyon sayı). Sadece <b>yığındaki token\'ların</b> satırları türev alır.',
+  out:'Yok (yolculuğun sonu).',
+  why:'Aynı token iki kez geçtiyse iki türev <b>toplanır</b>. Aynı sayılar çıkış matrisi olarak da kullanıldığı için tablo hem girişten hem çıkıştan türev alır.',
+  ex:'"Sabah" ve "armut" satırları güncellenir, "araba" satırı bu adımda aynen kalır. <b>Bitti:</b> tüm ağırlıkların türevi hazır. Şimdi optimizer (5. kart) hepsini birden günceller.'}
+];
+(function(){
+  const V=768,VOC=50257,CTX=1024,FF=4*V;
+  const tokTab=VOC*V, posTab=CTX*V, attn=4*V*V, ffn=2*V*FF, blk=attn+ffn;
+  const fm=n=>(n/1e6).toFixed(1).replace('.',',');
+  const rep={__L__:(-Math.log(0.02)).toFixed(2).replace('.',','),__H__:fm(tokTab),__F__:fm(ffn),__A__:fm(attn),__P__:Math.round(posTab/1000).toLocaleString('tr-TR'),__T__:fm(tokTab)};
+  GS.forEach(g=>['in','own','out','why','ex'].forEach(k=>{for(const r in rep)g[k]=g[k].split(r).join(rep[r])}));
+  let cur=-1;
+  const list=document.getElementById('gsList'),det=document.getElementById('gsDet');
+  GS.forEach((g,i)=>{
+    const b=document.createElement('div');b.className='gs-item'+(g.grp?' grp':'');b.dataset.i=i;
+    b.innerHTML='<b>'+(i+1)+'. '+g.t+'</b><small>'+g.sub+'</small>';
+    b.onclick=e=>{e.stopPropagation();show(i)};
+    list.appendChild(b);
+  });
+  function show(i){
+    cur=i;
+    [...list.children].forEach((c,k)=>{c.classList.toggle('cur',k===i);c.classList.toggle('seen',k<i)});
+    const g=GS[i];
+    det.innerHTML='<h4>'+(i+1)+'/'+GS.length+' · '+g.t+'</h4>'+
+      '<p><span class="lab in">GELEN</span>'+g.in+'</p>'+
+      '<p><span class="lab own">KENDİ AĞIRLIĞI</span>'+g.own+'</p>'+
+      '<p><span class="lab out">GERİYE GEÇEN</span>'+g.out+'</p>'+
+      '<p><span class="lab why">NEDEN?</span>'+g.why+'</p>'+
+      '<p><span class="lab ex">ÖRNEK</span>'+g.ex+'</p>';
+    list.children[i].scrollIntoView({block:'nearest'});
+  }
+  document.getElementById('gsNext').onclick=e=>{e.stopPropagation();show(Math.min(cur+1,GS.length-1))};
+  document.getElementById('gsPrev').onclick=e=>{e.stopPropagation();show(Math.max(cur-1,0))};
+  document.getElementById('gsReset').onclick=e=>{e.stopPropagation();show(0)};
+  let gt=null;const gp=document.getElementById('gsPlay');
+  gp.onclick=e=>{e.stopPropagation();
+    if(gt){clearInterval(gt);gt=null;gp.textContent='▶ Hepsini oynat';return}
+    show(0);gp.textContent='⏸ Durdur';
+    gt=setInterval(()=>{if(cur>=GS.length-1){clearInterval(gt);gt=null;gp.textContent='▶ Tekrar oynat';return}show(cur+1)},4500)};
+  show(0);
+
+  // parametre sayıları
+  const rows=[['Kelime tablosu (wte)',tokTab,'Sadece yığındaki token\'ların satırları'],
+              ['Konum tablosu (wpe)',posTab,'Sadece kullanılan konumların satırları'],
+              ['Attention (Wq,Wk,Wv,out_proj) × 12 blok',attn*12,'Her adımda tamamı'],
+              ['FFN (W1,W2) × 12 blok',ffn*12,'Her adımda tamamı (kapalı dedektörler hariç etkili)']];
+  const tot=rows.reduce((a,r)=>a+r[1],0);
+  let h='<table class="pt"><tr><th>Ağırlık</th><th>Sayı</th><th>Türev nereden/ne zaman?</th></tr>';
+  rows.forEach(r=>h+='<tr><td>'+r[0]+'</td><td>'+Math.round(r[1]).toLocaleString('tr-TR')+'</td><td style="text-align:left;font-family:inherit">'+r[2]+'</td></tr>');
+  h+='<tr><td><b>Toplam (LayerNorm ve bias hariç)</b></td><td class="tot">'+Math.round(tot).toLocaleString('tr-TR')+'</td><td style="text-align:left;font-family:inherit">≈ '+fm(tot)+' milyon: GPT-2 small\'un bilinen ≈124 milyonuna yakın</td></tr></table>';
+  document.getElementById('gsCount').innerHTML=h;
+
+  // kısayol deneyi (not defterindeki gerçek çıktılar)
+  const NO=[0.00020173584925942123,0.00012011159560643137,0.0007152040489017963,0.0013988736318424344,0.005049645435065031];
+  const YES=[0.22169792652130127,0.20694108307361603,0.3289699852466583,0.2665732204914093,1.3258541822433472];
+  const nm=['Katman 1 (girişe en yakın)','Katman 2','Katman 3','Katman 4','Katman 5 (çıkışa yakın)'];
+  const lg=v=>Math.max(0,(Math.log10(v)+4)/4.4*100);
+  let b='<b>Kısayolsuz</b>';
+  NO.forEach((v,i)=>b+='<div class="gbar"><span>'+nm[i]+'</span><div class="tr"><div class="fl" style="width:'+lg(v)+'%;background:#94a3b8"></div></div><span class="v">'+v.toFixed(4).replace('.',',')+'</span></div>');
+  b+='<b>Kısayollu</b>';
+  YES.forEach((v,i)=>b+='<div class="gbar"><span>'+nm[i]+'</span><div class="tr"><div class="fl" style="width:'+lg(v)+'%;background:#c0392b"></div></div><span class="v">'+v.toFixed(4).replace('.',',')+'</span></div>');
+  document.getElementById('gsBars').innerHTML=b;
+})();
 
 </script>
 </body>

@@ -105,6 +105,36 @@
   .mt.lock td:not(.rl){background:#f1f5f9;color:#475569}
   .mt.res td:not(.rl){background:#eaf2fb;color:#1d4f8f;font-weight:600}
   .xi{width:56px;text-align:center;border:2px solid #f59e0b;background:#fffbeb;border-radius:6px;padding:4px;font:inherit}
+
+  /* ---- Kod paneli (sağ taraf) ---- */
+  :root{--cpw:min(48vw,640px)}
+  body.cp-open{padding-right:var(--cpw);transition:padding .2s}
+  #cp{position:fixed;top:0;right:0;bottom:0;width:var(--cpw);background:#0f172a;color:#e2e8f0;z-index:50;display:none;flex-direction:column;box-shadow:-6px 0 22px #0006}
+  body.cp-open #cp{display:flex}
+  .cp-h{display:flex;gap:8px;align-items:center;padding:8px 10px;background:#020617;border-bottom:1px solid #1e293b}
+  .cp-h select{flex:1;min-width:0;font:inherit;font-size:.85rem;background:#1e293b;color:#e2e8f0;border:1px solid #334155;border-radius:8px;padding:6px}
+  .cp-h button{padding:6px 11px;font-size:.85rem;border-radius:8px}
+  .cp-h button.alt{background:#1e293b;color:#e2e8f0;border-color:#334155}
+  .cp-b{overflow:auto;padding:12px 14px 40px;flex:1;-webkit-overflow-scrolling:touch}
+  .cp-b h3{margin:2px 0 6px;color:#fcd34d;font-size:1.05rem}
+  .cp-b .cpi{font-size:.92rem;line-height:1.5;margin-bottom:8px}
+  .cp-b .cpw{background:#1e293b;border-left:4px solid #38bdf8;border-radius:8px;padding:8px 10px;font-size:.88rem;margin:8px 0}
+  .cp-b code{background:#1e293b;color:#fde68a;border-radius:4px;padding:0 4px;font-size:.85em}
+  .cp-leg{font-size:.76rem;color:#94a3b8;margin:8px 0 4px}
+  .cp-leg i{font-style:normal;padding:0 5px;border-radius:4px;background:#1e293b}
+  #cpCode{margin:0;background:#020617;border:1px solid #1e293b;border-radius:10px;padding:8px 0;overflow-x:auto;font-family:ui-monospace,Consolas,"Courier New",monospace;font-size:.78rem;line-height:1.55;counter-reset:ln}
+  #cpCode .cl{display:block;white-space:pre-wrap;word-break:break-word;padding:0 12px 0 calc(2.6em + 12px);text-indent:calc(-2.6em - 12px);counter-increment:ln;min-height:1.55em}
+  #cpCode .cl:before{content:counter(ln);display:inline-block;width:2.6em;text-align:right;margin-right:12px;color:#475569}
+  #cpCode .k{color:#c084fc}#cpCode .s{color:#86efac}#cpCode .n{color:#fdba74}#cpCode .f{color:#7dd3fc}
+  #cpCode .co{color:#64748b}
+  #cpCode .ca{color:#fbbf24;background:#fbbf2418;border-radius:3px}
+  #cpCode .cl.add{background:#fbbf2410}
+  .cp-src{font-size:.76rem;color:#94a3b8;margin-top:12px;border-top:1px solid #1e293b;padding-top:8px}
+  .cp-src a{color:#7dd3fc}
+  .codebar{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px;align-items:center}
+  .codebar span{font-size:.8rem;color:var(--muted)}
+  button.codebtn{background:#0f172a;color:#fcd34d;font-size:.82rem;padding:5px 11px;border-radius:999px;border:0}
+  @media(max-width:900px){body.cp-open{padding-right:0}#cp{width:100%}}
 </style>
 </head>
 <body>
@@ -129,6 +159,7 @@
   <!-- 1 -->
   <section class="card open" id="c1" data-shape="2 token" data-note="Metin → sayılar">
     <h2>1. Giriş &amp; Tokenizer (Parçalayıcı) <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="tok">Tokenizer kodu</button></div>
     <div class="row"><span class="tok">"Sabah armut"</span> → <span class="tok">[102, 40120]</span> <span>(2 Token ID)</span></div>
     <div class="detail">
       <div class="why"><b class="l">Neden?</b> Model harf/kelime bilmez, sadece sayı bilir. Tokenizer (Parçalayıcı) metni parçalara (token) böler ve her parçaya sözlükteki numarasını, yani ID'yi (Identifier / Kimlik numarası) verir. Sözlükte 50.257 parça var.</div>
@@ -140,6 +171,7 @@
   <!-- 2 -->
   <section class="card open" id="c2" data-shape="2 × 768" data-note="Anlam + sıra bilgisi toplandı">
     <h2>2. Embedding (Gömme / Anlam vektörü) + Konum (Position) <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="emb">Embedding + konum kodu</button></div>
     <div class="row">
       <div class="mini"><b>Kelime Tablosu</b><br>50.257 × 768<br>
         <div class="grid" style="grid-template-columns:repeat(12,10px);margin-top:4px" data-rand="60"></div></div>
@@ -206,6 +238,7 @@
     <!-- 3 -->
     <section class="card open" id="c3" data-shape="2 × 768" data-note="Dikkat: kelimeler birbirine bakıyor">
       <h2>3. MHA (Multi-Head Attention / Çok Başlı Dikkat) <small>başlığa tıkla: aç/kapat</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="qkv">Q/K/V kodu</button><button class="codebtn" data-code="mha">Çok başlı attention kodu</button><button class="codebtn" data-code="weights">Wq/Wk/Wv tek matris</button></div>
       <div>Yatay paralel bölünme: <span class="chip">12 baş × 64 boyut</span><br><b>X</b> (girdi, <span class="chip">2×768</span>) × <b>Wq, Wk, Wv</b> (modelin ağırlıkları, her biri <span class="chip">768×768</span>) = <b>Q, K, V</b> (her biri <span class="chip">2×768</span>)</div>
       <div class="heads" id="heads"></div>
       <div class="detail">
@@ -290,6 +323,7 @@
     <!-- 4 -->
     <section class="card open" id="c4" data-shape="2 × 3.072" data-note="FFN içinde geçici genişleme">
       <h2>4. FFN (Feed-Forward Network / İleri Beslemeli Ağ) + GELU (Gaussian Error Linear Unit / Gauss Hata Doğrusal Birimi) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="ffn">FFN + GELU kodu</button><button class="codebtn" data-code="blk">Blok: LayerNorm + kısayol</button></div>
       <div class="expand">
         <div class="ebar" style="width:90px">768</div> →
         <div class="ebar" style="width:260px">3.072</div> →
@@ -368,6 +402,7 @@
   <!-- 5 -->
   <section class="card open" id="c5" data-shape="1 × 768 → 1 × 50.257" data-note="Sadece son token kullanılır">
     <h2>5. LM Head (Language Model Head / Dil Modeli Çıkış Katmanı) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="gpt">GPTModel (hepsi bir arada)</button></div>
     <div class="row">Son Token <span class="chip">1 × 768</span> × <span class="chip">768 × 50.257</span> → <span class="chip">1 × 50.257</span> Logits (Ham puanlar)</div>
     <div class="detail">
       <div class="why"><b class="l">Neden sadece son token?</b> Bir sonraki kelimeyi tahmin ederken "armut" konumundaki vektör, tüm cümlenin özetini taşır. Sözlükteki her kelime için bir puan üretilir.</div>
@@ -393,6 +428,7 @@
   <!-- 7 -->
   <section class="card open" id="c7" data-shape="Girdi 1 token uzar" data-note="Her turda 1 yeni token">
     <h2>7. Üretim Döngüsü (Autoregressive / Kendi çıktısını girdi yapan üretim) <small>başlığa tıkla</small></h2>
+    <div class="codebar"><span>💻 Kod:</span><button class="codebtn" data-code="gen">Üretim döngüsü kodu</button></div>
     <div>Model aynı anda tüm cümleyi değil, <b>sadece bir sonraki token'ı</b> üretir. Seçileni girdiye ekler ve 1–6. adımları baştan çalıştırır. ChatGPT'nin kelime kelime yazması bundan.</div>
     <div class="detail">
       <div class="row"><button id="genStep">▶ Bir token üret</button><button class="alt" id="genReset">Sıfırla</button></div>
@@ -439,6 +475,18 @@
   <footer>Gemini görselinden etkileşimli HTML'e dönüştürüldü · Eğitim kısmı için <a class="lnk" href="GPT2_Egitim.html">GPT2_Egitim.html</a></footer>
 </div>
 
+
+<aside id="cp" aria-label="Kod paneli">
+  <div class="cp-h"><select id="cpSel" aria-label="Kod seç"></select><button class="alt" id="cpCopy">📋 Kopyala</button><button id="cpClose" aria-label="Kapat">✕ Kapat</button></div>
+  <div class="cp-b">
+    <h3 id="cpTitle"></h3>
+    <div class="cpi" id="cpIntro"></div>
+    <div class="cpw" id="cpWhy"></div>
+    <div class="cp-leg">Renkler: <i class="co">gri = not defterindeki özgün yorum</i> <i class="ca">sarı = <b>#▶</b> bizim eklediğimiz açıklama</i></div>
+    <pre id="cpCode"></pre>
+    <div class="cp-src" id="cpSrc"></div>
+  </div>
+</aside>
 <script>
 
 const cards=[...document.querySelectorAll('.card')];
@@ -731,6 +779,59 @@ const qb=document.getElementById('quizBtns');
 opts.forEach(([t,ok])=>{const b=document.createElement('button');b.className='alt';b.textContent=t;
   b.onclick=()=>{document.getElementById('quizRes').innerHTML=ok?'<span class="ok">✅ Doğru! Konum tablosu 1.024 × 768 olduğu için.</span>':'<span class="no">❌ Tekrar dene. İpucu: Konum tablosunun satır sayısına bak.</span>'};
   qb.appendChild(b)});
+
+
+// ---------- Kod paneli ----------
+const CODE={"tok": {"title": "Tokenizer: metin → sayı", "src": "Ders 03 · hücre 52–58", "intro": "Metni önce parçalara (token), sonra her parçayı bir <b>numaraya</b> çevirir. Model kelime değil numara görür.", "why": "Neden BPE? Bilmediği kelimeyi (<code>someunknownPlace</code>) bile bilinen küçük parçalara bölebildiği için “bilinmeyen kelime” sorunu kalmaz.", "code": "import tiktoken                                   #▶ OpenAI'ın hazır, hızlı BPE tokenizer kütüphanesi\ntokenizer = tiktoken.get_encoding(\"gpt2\")         #▶ GPT-2'nin kendi sözlüğü: 50 257 token (bu tablo eğitimle gelmez, sabittir)\n\ntext = (\n    \"Hello, do you like tea? <|endoftext|> In the sunlit terraces\"\n    \"of someunknownPlace.\"\n)\n\n#▶ encode: metin -> token numaraları listesi. <|endoftext|> özel bir \"metin bitti\" işaretidir,\n#▶ bu yüzden açıkça izin veriyoruz.\nintegers = tokenizer.encode(text, allowed_special={\"<|endoftext|>\"})\nprint(integers)\n\n#▶ decode: numaralar -> metin. Gidiş-dönüş kayıpsızdır: aynı metin geri gelir.\nprint(tokenizer.decode(integers))\n\n#▶ Anlamsız bir kelime bile hata vermez, küçük parçalara bölünür:\nintegers = tokenizer.encode(\"Akwirw ier\")   # 10 karakter -> 6 token parçası\nprint(integers)                              # [33901, 86, 343, 86, 220, 959]\nprint(tokenizer.decode(integers))            # Akwirw ier"}, "emb": {"title": "Embedding: numara → vektör, + konum", "src": "Ders 03 · hücre 100–122", "intro": "Token numarası, bir <b>tablodan satır seçmek</b> için kullanılır (hesap yok, arama var). Aynı şeyi konum için de yapıp <b>topluyoruz</b>.", "why": "Neden iki tablo? Token tablosu sadece kelimeye bakar; “armut” başta da sonda da aynı vektörü alır. Sıra bilgisi için ikinci bir tablo gerekir. Toplama, vektör boyunu korur (yan yana eklemek boyutu ikiye katlardı). İki tablonun sayıları başta rastgeledir, <b>eğitim</b> onları yerine oturtur.", "code": "import torch\n\nvocab_size = 50257      #▶ sözlükteki token sayısı -> tabloda 50 257 satır\noutput_dim = 256        #▶ her satırda kaç sayı (GPT-2 small'da gerçek değer 768, burada ders için 256)\nmax_length = 4          #▶ pencere uzunluğu (GPT-2'de 1 024 konum var)\n\n#▶ TOKEN TABLOSU: (50257, 256). Başlangıçta rastgele; requires_grad=True, yani eğitimde öğrenilecek.\ntoken_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)\ntoken_embeddings = token_embedding_layer(inputs)   # (8, 4) -> (8, 4, 256): her numara kendi satırına açıldı\n\n#▶ KONUM TABLOSU: satır sayısı = konum sayısı. Girdi token numarası değil, 0,1,2,3 (sıra numarası).\npos_embedding_layer = torch.nn.Embedding(max_length, output_dim)   # tablo: (4, 256)\npos_embeddings = pos_embedding_layer(torch.arange(max_length))     # (4,) -> (4, 256)\n\n#▶ TOPLAMA: (8,4,256) + (4,256). PyTorch eksik boyutu otomatik tekrarlar (broadcasting),\n#▶ yani 3. konumun imzası, hangi cümlede olursa olsun aynı eklenir.\ninput_embeddings = token_embeddings + pos_embeddings   # (8, 4, 256) -> modelin asıl girdisi"}, "qkv": {"title": "Attention: Q, K, V sayılarla", "src": "Ders 05 · hücre 175–207", "intro": "Her token vektörü <b>üç ayrı ağırlık matrisiyle</b> çarpılır: Q (ne arıyorum), K (ben neyim), V (verebileceğim bilgi). Sonra Q·K skoru, softmax ve V karışımı gelir.", "why": "Neden böyle? Q×K skoru “kim kime bakmalı” sorusunun cevabıdır. Yüzdeler (softmax) V'leri karıştırır: çok bakılan token'ın bilgisi çıktıya çok girer. <b>Wq, Wk, Wv eğitimden gelen sabit sayılardır</b>; Q, K, V ise her girdide yeniden hesaplanır.", "code": "class SelfAttention_v2(nn.Module):\n\n    def __init__(self, d_in, d_out, qkv_bias=False):\n        super().__init__()\n        #▶ Üç ağırlık matrisi (nn.Linear = matris çarpımı). Bunlar modelin ÖĞRENDİĞİ sayılardır.\n        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_key   = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)\n\n    def forward(self, x):\n        keys = self.W_key(x)        #▶ K = x × Wk   (\"ben neyim\")\n        queries = self.W_query(x)   #▶ Q = x × Wq   (\"ne arıyorum\")\n        values = self.W_value(x)    #▶ V = x × Wv   (\"verebileceğim bilgi\")\n\n        #▶ SKOR: her Q, her K ile nokta çarpımı. (T, d) @ (d, T) -> (T, T): \"herkes herkese\" tablosu\n        attn_scores = queries @ keys.T\n        #▶ sqrt(d) ile böl: sayılar çok büyümesin, softmax tek tokena kilitlenmesin.\n        #▶ softmax: her satırı toplamı 1 olan yüzdelere çevirir.\n        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)\n\n        #▶ KARIŞTIR: yüzdelerle V'lerin ağırlıklı toplamı = her token için bağlam vektörü\n        context_vec = attn_weights @ values\n        return context_vec"}, "mha": {"title": "Çok başlı, maskeli attention", "src": "Ders 06 · hücre 253", "intro": "GPT-2'deki gerçek attention: <b>nedensel maske</b> (geleceğe bakma) + <b>12 baş</b> (her biri ayrı bir bakış açısı). 768 boyut, 12 başa 64'er boyut olarak bölünür.", "why": "Neden maske? Model “sıradaki kelimeyi” tahmin ediyor; cevabı görememeli. Neden çok baş? Bir baş dilbilgisine, biri yakın kelimeye, biri anlama bakabilir; sonunda birleştirilir.", "code": "class MultiHeadAttention(nn.Module):\n    def __init__(self, d_in, d_out, context_length, dropout, num_heads, qkv_bias=False):\n        super().__init__()\n        assert (d_out % num_heads == 0), \"d_out must be divisible by num_heads\"\n        self.d_out = d_out\n        self.num_heads = num_heads\n        self.head_dim = d_out // num_heads   #▶ baş başına boyut: 768 / 12 = 64\n\n        self.W_query = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_key = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.W_value = nn.Linear(d_in, d_out, bias=qkv_bias)\n        self.out_proj = nn.Linear(d_out, d_out)   #▶ başların çıktısını karıştıran katman (o da öğrenilir)\n        self.dropout = nn.Dropout(dropout)\n        #▶ Maske bir parametre değil (öğrenilmez), ama modelle birlikte taşınır. Üst üçgen = \"gelecek\".\n        self.register_buffer(\"mask\", torch.triu(torch.ones(context_length, context_length), diagonal=1))\n\n    def forward(self, x):\n        b, num_tokens, d_in = x.shape      #▶ b = kaç cümle, T = kaç token\n\n        keys = self.W_key(x)               #▶ (b, T, 768) -> (b, T, 768)\n        queries = self.W_query(x)\n        values = self.W_value(x)\n\n        #▶ 1) BÖL: 768 sayıyı 12 baş × 64 sayı olarak göster (yeni sayı üretilmiyor, sadece düzen değişiyor)\n        keys = keys.view(b, num_tokens, self.num_heads, self.head_dim)\n        values = values.view(b, num_tokens, self.num_heads, self.head_dim)\n        queries = queries.view(b, num_tokens, self.num_heads, self.head_dim)\n\n        #▶ 2) GRUPLA: baş eksenini öne al, her baş kendi tablosuyla bağımsız çalışsın\n        keys = keys.transpose(1, 2)        # (b, H, T, 64)\n        queries = queries.transpose(1, 2)\n        values = values.transpose(1, 2)\n\n        #▶ Her baş için ayrı skor tablosu: (b,H,T,64) @ (b,H,64,T) -> (b,H,T,T)\n        attn_scores = queries @ keys.transpose(2, 3)\n\n        #▶ Maske: gelecek hücreleri -sonsuz yap -> softmax onlara tam 0 yüzde verir\n        mask_bool = self.mask.bool()[:num_tokens, :num_tokens]\n        attn_scores.masked_fill_(mask_bool, -torch.inf)\n\n        attn_weights = torch.softmax(attn_scores / keys.shape[-1]**0.5, dim=-1)   #▶ satır toplamı 1\n        attn_weights = self.dropout(attn_weights)   #▶ yalnız eğitimde: bazı bağlantıları rastgele kapatır\n\n        #▶ 3) YAPIŞTIR: yüzdelerle V karıştır, başları yan yana birleştir\n        context_vec = (attn_weights @ values).transpose(1, 2)\n        context_vec = context_vec.contiguous().view(b, num_tokens, self.d_out)   # (b, T, 768)\n        context_vec = self.out_proj(context_vec)    #▶ 12 başın bulduğunu karıştır\n        return context_vec"}, "ffn": {"title": "FFN: genişlet → kapı (GELU) → daralt", "src": "Ders 07 · hücre 275–282", "intro": "Her token, attention'dan sonra <b>kendi başına</b> bu küçük ağdan geçer. Önce 768 → 3.072 (4 kat uzatır), sonra GELU kapısı, sonra tekrar 768.", "why": "Neden 4 kat? Tasarımcıların seçtiği bir orandır (doğa kanunu değil): geniş ara katman daha çok “dedektör” demek. Neden GELU? Kapı olmazsa iki matris çarpımı tek matrise çöker, genişletmenin anlamı kalmaz. İki <code>nn.Linear</code> = çıkarım sayfasındaki <b>W1</b> ve <b>W2</b>.", "code": "class GELU(nn.Module):\n    def forward(self, x):\n        #▶ GELU: ReLU'nun yumuşak hali. Her sayıya tek tek uygulanır, şekil değişmez.\n        #▶ Küçük negatifler tamamen silinmez (en düşük değer yaklaşık -0,17).\n        return 0.5 * x * (1 + torch.tanh(\n            torch.sqrt(torch.tensor(2.0 / torch.pi)) *\n            (x + 0.044715 * torch.pow(x, 3))\n        ))\n\n\nclass FeedForward(nn.Module):\n    def __init__(self, cfg):\n        super().__init__()\n        self.layers = nn.Sequential(\n            nn.Linear(cfg[\"emb_dim\"], 4 * cfg[\"emb_dim\"]),   #▶ W1: (…, 768) -> (…, 3072) genişlet (768 × 4 = 3072)\n            GELU(),                                          #▶ kapı: şekil aynı, değerler bükülür\n            nn.Linear(4 * cfg[\"emb_dim\"], cfg[\"emb_dim\"]),   #▶ W2: (…, 3072) -> (…, 768) daralt\n        )\n\n    def forward(self, x):\n        #▶ Çıkış yine 768: bloklar üst üste dizilebilsin diye giriş ve çıkış şekli aynı olmak zorunda.\n        return self.layers(x)"}, "blk": {"title": "Transformer bloğu: LayerNorm + kısayol", "src": "Ders 07, 09 · hücre 292, 345", "intro": "Bir blok = <b>hizala → attention → kısayolla topla → hizala → FFN → kısayolla topla</b>. GPT-2 bunu 12 kez üst üste dizer.", "why": "Neden <code>x + shortcut</code>? Girdi çıktıya aynen eklenir; bilgi bloktan kaybolmadan geçer ve eğitimde türev de bu yoldan kolayca geri akar. Neden LayerNorm? Her token'ın sayılarını ortak ölçeğe getirir, hesap kararlı kalır.", "code": "class LayerNorm(nn.Module):\n    def __init__(self, emb_dim):\n        super().__init__()\n        self.eps = 1e-5\n        self.scale = nn.Parameter(torch.ones(emb_dim))    #▶ öğrenilen: hizalanmış sayıyı yeniden ölçekler\n        self.shift = nn.Parameter(torch.zeros(emb_dim))   #▶ öğrenilen: hizalanmış sayıyı kaydırır\n\n    def forward(self, x):\n        #▶ Hesap SON eksende: her token kendi 768 sayısı içinde hizalanır, komşulara bakılmaz.\n        mean = x.mean(dim=-1, keepdim=True)\n        var = x.var(dim=-1, keepdim=True, unbiased=False)\n        norm_x = (x - mean) / torch.sqrt(var + self.eps)   #▶ ortalama 0, yayılım 1\n        return self.scale * norm_x + self.shift\n\n\nclass TransformerBlock(nn.Module):\n    def __init__(self, cfg):\n        super().__init__()\n        self.att = MultiHeadAttention(\n            d_in=cfg[\"emb_dim\"], d_out=cfg[\"emb_dim\"],\n            context_length=cfg[\"context_length\"],\n            num_heads=cfg[\"n_heads\"], dropout=cfg[\"drop_rate\"],\n            qkv_bias=cfg[\"qkv_bias\"])\n        self.ff = FeedForward(cfg)\n        self.norm1 = LayerNorm(cfg[\"emb_dim\"])    #▶ attention'dan önce hizalama\n        self.norm2 = LayerNorm(cfg[\"emb_dim\"])    #▶ FFN'den önce hizalama\n        self.drop_shortcut = nn.Dropout(cfg[\"drop_rate\"])\n\n    def forward(self, x):                         # x: (b, T, 768)\n        shortcut = x                              #▶ girdiyi kenara koy\n        x = self.norm1(x)                         #▶ hizala\n        x = self.att(x)                           #▶ token'lar birbirine bakar (toplantı)\n        x = self.drop_shortcut(x)\n        x = x + shortcut                          #▶ KISAYOL: kenardaki girdiyi geri ekle\n\n        shortcut = x\n        x = self.norm2(x)\n        x = self.ff(x)                            #▶ her token kendi masasında (FFN)\n        x = self.drop_shortcut(x)\n        x = x + shortcut                          #▶ ikinci kısayol\n        return x                                  #▶ şekil girenle aynı: (b, T, 768)"}, "gpt": {"title": "GPTModel: hepsi bir arada", "src": "Ders 09 · hücre 265, 349", "intro": "Tüm parçalar burada birleşir: token+konum tabloları → 12 blok → son hizalama → çıkış katmanı (768 → 50.257 puan).", "why": "Çıkışta her konum için <b>50.257 puan</b> (logit) çıkar. Çıkarımda yalnız son konumun puanı kullanılır; <b>eğitimde</b> bütün konumlar loss'a girer.", "code": "GPT_CONFIG_124M = {\n    \"vocab_size\": 50257,     #▶ sözlük boyu\n    \"context_length\": 1024,  #▶ bağlam penceresi (token)\n    \"emb_dim\": 768,          #▶ her token'ın vektör boyu\n    \"n_heads\": 12,           #▶ attention başı sayısı\n    \"n_layers\": 12,          #▶ transformer bloğu sayısı\n    \"drop_rate\": 0.1,        #▶ eğitimde değerlerin %10'unu rastgele sıfırlar\n    \"qkv_bias\": False\n}\n\nclass GPTModel(nn.Module):\n    def __init__(self, cfg):\n        super().__init__()\n        self.tok_emb = nn.Embedding(cfg[\"vocab_size\"], cfg[\"emb_dim\"])       #▶ kelime tablosu (50257, 768)\n        self.pos_emb = nn.Embedding(cfg[\"context_length\"], cfg[\"emb_dim\"])   #▶ konum tablosu (1024, 768)\n        self.drop_emb = nn.Dropout(cfg[\"drop_rate\"])\n        self.trf_blocks = nn.Sequential(                                     #▶ 12 ayrı blok, sırayla\n            *[TransformerBlock(cfg) for _ in range(cfg[\"n_layers\"])])\n        self.final_norm = LayerNorm(cfg[\"emb_dim\"])\n        self.out_head = nn.Linear(cfg[\"emb_dim\"], cfg[\"vocab_size\"], bias=False)   #▶ 768 -> 50257 puan\n\n    def forward(self, in_idx):                                   # in_idx: (b, T) token numaraları\n        batch_size, seq_len = in_idx.shape\n        tok_embeds = self.tok_emb(in_idx)                        #▶ (b, T, 768)\n        pos_embeds = self.pos_emb(torch.arange(seq_len, device=in_idx.device))   # (T, 768)\n        x = tok_embeds + pos_embeds                              #▶ kelime + konum\n        x = self.drop_emb(x)\n        x = self.trf_blocks(x)                                   #▶ 12 blok, şekil değişmez\n        x = self.final_norm(x)\n        logits = self.out_head(x)                                #▶ (b, T, 768) -> (b, T, 50257)\n        return logits                                            #▶ her konumda 50 257 ham puan"}, "weights": {"title": "Wq, Wk, Wv gerçekte tek matris", "src": "Ders 12 · hücre 448", "intro": "OpenAI'ın dosyasında Q, K, V <b>tek büyük matris</b> olarak durur (768 × 2304). Kod onu üçe böler.", "why": "Mantıksal olarak üç ayrı matris vardır; dosyada tek parça saklanması sadece bir kayıt düzenidir. Ayrıca kelime ve konum tabloları da aynı dosyadan yüklenir: bunlar eğitimle gelen <b>sabit sayılardır</b>.", "code": "def load_weights_into_gpt(gpt, params):\n    assign(gpt.pos_emb.weight, params[\"wpe.weight\"])    #▶ konum tablosu: (1024, 768)\n    assign(gpt.tok_emb.weight, params[\"wte.weight\"])    #▶ kelime tablosu: (50257, 768)\n\n    for b, blk in enumerate(gpt.trf_blocks):             #▶ 12 blok, sırayla\n        p = f\"h.{b}.\"                                    # dosyada bu bloğun ön eki: h.0., h.1., ...\n\n        #▶ c_attn tek matris (768, 2304) -> üçe bölünür: Wq, Wk, Wv, her biri (768, 768)\n        q_w, k_w, v_w = np.split(params[p + \"attn.c_attn.weight\"], 3, axis=-1)\n        # .T: dosya (girdi, çıktı) saklar, nn.Linear (çıktı, girdi) bekler\n        assign(blk.att.W_query.weight, q_w.T)    #▶ sorgu (Q) matrisi\n        assign(blk.att.W_key.weight, k_w.T)      #▶ anahtar (K) matrisi\n        assign(blk.att.W_value.weight, v_w.T)    #▶ değer (V) matrisi\n        # ... (bias, out_proj, FFN ve LayerNorm ağırlıkları da aynı şekilde atanır)"}, "gen": {"title": "Üretim döngüsü", "src": "Ders 09, 11 · hücre 361, 418", "intro": "Model <b>bir seferde bir token</b> üretir: tahmin et → sona ekle → yeni diziyle tekrar. Sıcaklık (temperature) ve top-k seçimi burada devreye girer.", "why": "Neden döngü? Model sadece “bir sonraki token”ı tahmin eder. Uzun metin, bu tahminin kendi çıktısını girdi yaparak tekrarlanmasıdır. Üretimde <code>no_grad</code> vardır: <b>eğitim yok, ağırlıklar sabit</b>.", "code": "def generate(model, idx, max_new_tokens, context_size, temperature=0.0, top_k=None, eos_id=None):\n    for _ in range(max_new_tokens):                    #▶ her turda bir yeni token\n        idx_cond = idx[:, -context_size:]              #▶ pencereye sığan son token'lar\n        with torch.no_grad():                          #▶ üretimde türev gerekmez, ağırlıklar sabit\n            logits = model(idx_cond)                   # (b, T) -> (b, T, 50257)\n        logits = logits[:, -1, :]                      #▶ yalnız SON konumun puanları: (b, 50257)\n\n        if top_k is not None:                          #▶ Top-k: yalnız en iyi k adayı bırak\n            top_logits, _ = torch.topk(logits, top_k)\n            min_val = top_logits[:, -1]                # k'ncı en büyük puan = eşik\n            logits = torch.where(logits < min_val, torch.tensor(float(\"-inf\")).to(logits.device), logits)\n\n        if temperature > 0.0:                          #▶ sıcaklık: T<1 keskin (güvenli), T>1 düz (yaratıcı)\n            logits = logits / temperature\n            probs = torch.softmax(logits, dim=-1)      #▶ puanlar -> olasılıklar\n            idx_next = torch.multinomial(probs, num_samples=1)   #▶ olasılığa göre ZAR at\n        else:\n            idx_next = torch.argmax(logits, dim=-1, keepdim=True)   #▶ sıcaklık 0: hep en olası token\n\n        if idx_next == eos_id:                         #▶ \"metin bitti\" token'ı gelirse dur\n            break\n        idx = torch.cat((idx, idx_next), dim=1)        #▶ yeni token'ı sona ekle ve tekrar başla\n    return idx"}};
+const CP_REPO='https://github.com/celiktepesahin/chatgpt-from-scratch-tr';
+const cpEsc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+function cpHl(line){
+  let code=line,com='',q=null,ci=-1;
+  for(let i=0;i<line.length;i++){const ch=line[i];
+    if(q){if(ch===q)q=null}else if(ch==='"'||ch==="'"){q=ch}else if(ch==='#'){ci=i;break}}
+  if(ci>=0){code=line.slice(0,ci);com=line.slice(ci)}
+  let h=cpEsc(code).replace(/("[^"]*"|'[^']*')|\b(class|def|return|for|in|if|else|import|from|with|not|and|or|None|True|False|assert|break|as)\b|\b(\d+\.?\d*(?:e-?\d+)?)\b|\b(self|super)\b/g,
+    (m,s,k,n,f)=>s?'<span class="s">'+s+'</span>':k?'<span class="k">'+k+'</span>':n?'<span class="n">'+n+'</span>':'<span class="f">'+f+'</span>');
+  const add=com.startsWith('#\u25B6');
+  if(com)h+='<span class="'+(add?'ca':'co')+'">'+cpEsc(com)+'</span>';
+  return '<span class="cl'+(add?' add':'')+'">'+h+'</span>';
+}
+// Satır sonundaki #▶ açıklamasını, kodun hemen üstüne ayrı satır olarak al (dar panelde taşmasın)
+function cpExpand(code){
+  const out=[];
+  code.split('\n').forEach(l=>{
+    const m=l.match(/^(\s*)(\S.*?)\s+(#\u25B6.*)$/);
+    if(m&&!m[2].startsWith('#')){out.push(m[1]+m[3]);out.push(m[1]+m[2])}else out.push(l);
+  });
+  return out;
+}
+let cpCur=null;
+function openCode(key){
+  const c=CODE[key]; if(!c)return;
+  cpCur=key;
+  document.getElementById('cpSel').value=key;
+  document.getElementById('cpTitle').textContent=c.title;
+  document.getElementById('cpIntro').innerHTML=c.intro;
+  document.getElementById('cpWhy').innerHTML='<b>Neden?</b> '+c.why;
+  document.getElementById('cpCode').innerHTML=cpExpand(c.code).map(cpHl).join('');
+  document.getElementById('cpSrc').innerHTML='Kaynak: <a href="'+CP_REPO+'/blob/main/FULL-SERIES.ipynb" target="_blank" rel="noopener">celiktepesahin/chatgpt-from-scratch-tr</a> (Apache-2.0), <code>FULL-SERIES.ipynb</code>, '+c.src+'. Kod burada <b>kısaltıldı</b> ve <b>#▶</b> açıklamaları eklendi; özgün hâli için depoya bak.';
+  document.body.classList.add('cp-open');
+  document.querySelector('#cp .cp-b').scrollTop=0;
+}
+function closeCode(){document.body.classList.remove('cp-open')}
+(function(){
+  const sel=document.getElementById('cpSel');
+  Object.keys(CODE).forEach(k=>{const o=document.createElement('option');o.value=k;o.textContent='💻 '+CODE[k].title;sel.appendChild(o)});
+  sel.onchange=()=>openCode(sel.value);
+  document.getElementById('cpClose').onclick=closeCode;
+  document.getElementById('cpCopy').onclick=e=>{
+    const b=e.target,t=CODE[cpCur].code;
+    const done=()=>{b.textContent='✔ Kopyalandı';setTimeout(()=>b.textContent='📋 Kopyala',1400)};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,done)}else done();
+  };
+  document.querySelectorAll('button.codebtn').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();openCode(b.dataset.code)}));
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeCode()});
+})();
 
 </script>
 </body>
